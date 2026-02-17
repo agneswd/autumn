@@ -1,0 +1,19 @@
+[package]
+name = "autumn-bot"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = { workspace = true }
+dotenvy = { workspace = true }
+rustls = { workspace = true }
+sqlx = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+poise = { workspace = true }
+serenity = { workspace = true }
+autumn-commands = { workspace = true }
+autumn-core = { workspace = true }
+autumn-database = { workspace = true }
+autumn-utils = { workspace = true }

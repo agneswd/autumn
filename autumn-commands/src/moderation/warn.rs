@@ -1,0 +1,63 @@
+use poise::serenity_prelude as serenity;
+
+use crate::CommandMeta;
+use crate::moderation::embeds::{
+    guild_only_message, moderation_action_embed, permission_denied_message, target_profile_from_user,
+    usage_message,
+};
+use autumn_core::{Context, Error};
+use autumn_database::impls::warnings::record_warning;
+use autumn_utils::permissions::has_user_permission;
+
+pub const META: CommandMeta = CommandMeta {
+    name: "warn",
+    desc: "Issue a warning to a user.",
+    category: "moderation",
+    usage: "!warn <user> [reason]",
+};
+
+#[poise::command(prefix_command, slash_command, category = "Moderation")]
+pub async fn warn(
+    ctx: Context<'_>,
+    #[description = "The user to warn"] user: Option<serenity::User>,
+    #[description = "Reason for warning"] #[rest] reason: Option<String>,
+) -> Result<(), Error> {
+    let Some(guild_id) = ctx.guild_id() else {
+        ctx.say(guild_only_message()).await?;
+        return Ok(());
+    };
+
+    if !has_user_permission(
+        ctx.http(),
+        guild_id,
+        ctx.author().id,
+        serenity::Permissions::MANAGE_MESSAGES,
+    )
+    .await?
+    {
+        ctx.say(permission_denied_message()).await?;
+        return Ok(());
+    }
+
+    let Some(user) = user else {
+        ctx.say(usage_message(META.usage)).await?;
+        return Ok(());
+    };
+
+    let reason = reason.unwrap_or_else(|| "No reason provided".to_owned());
+    let warning = record_warning(
+        &ctx.data().db,
+        guild_id.get(),
+        user.id.get(),
+        ctx.author().id.get(),
+        &reason,
+    )
+    .await?;
+
+    let action = format!("warned #{}", warning.warn_number);
+    let target_profile = target_profile_from_user(&user);
+    let embed = moderation_action_embed(&target_profile, user.id, &action, Some(&reason), None);
+    ctx.send(poise::CreateReply::default().embed(embed)).await?;
+
+    Ok(())
+}
