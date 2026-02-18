@@ -1,4 +1,5 @@
 use poise::serenity_prelude as serenity;
+use tracing::error;
 
 use crate::CommandMeta;
 use crate::moderation::embeds::{guild_only_message, permission_denied_message, usage_message};
@@ -78,7 +79,8 @@ pub async fn case(
             let updated = match updated {
                 Ok(updated) => updated,
                 Err(source) => {
-                    ctx.say(format!("Failed to update reason: {}", source)).await?;
+                    error!(?source, "case reason update failed");
+                    ctx.say("Failed to update case reason.").await?;
                     return Ok(());
                 }
             };
@@ -118,7 +120,8 @@ pub async fn case(
             let added = match added {
                 Ok(added) => added,
                 Err(source) => {
-                    ctx.say(format!("Failed to add case note: {}", source)).await?;
+                    error!(?source, "case note add failed");
+                    ctx.say("Failed to add case note.").await?;
                     return Ok(());
                 }
             };
@@ -142,7 +145,8 @@ pub async fn case(
     let Some(case) = (match case {
         Ok(case) => case,
         Err(source) => {
-            ctx.say(format!("Failed to load case: {}", source)).await?;
+            error!(?source, "case load failed");
+            ctx.say("Failed to load case.").await?;
             return Ok(());
         }
     }) else {
@@ -153,7 +157,8 @@ pub async fn case(
     let events = match get_case_events(&ctx.data().db, guild_id.get(), &case_code, action_case_number).await {
         Ok(events) => events,
         Err(source) => {
-            ctx.say(format!("Failed to load case events: {}", source)).await?;
+            error!(?source, "case events load failed");
+            ctx.say("Failed to load case events.").await?;
             return Ok(());
         }
     };

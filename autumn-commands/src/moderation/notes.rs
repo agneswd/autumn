@@ -5,7 +5,7 @@ use crate::CommandMeta;
 use crate::moderation::embeds::{guild_only_message, permission_denied_message};
 use autumn_core::{Context, Error};
 use autumn_database::impls::notes::{add_user_note, clear_user_notes, list_user_notes};
-use autumn_utils::confirmation::{ConfirmationResult, prompt_confirm_decline};
+use autumn_utils::confirmation::{prompt_confirm_decline, resolve_confirmation_result};
 use autumn_utils::pagination::paginate_embed_pages;
 use autumn_utils::permissions::has_user_permission;
 
@@ -62,59 +62,26 @@ pub async fn notes(
             )
             .await?;
 
-            let interaction = match confirmation {
-                ConfirmationResult::TimedOut(message) => {
-                    message
-                        .channel_id
-                        .edit_message(
-                            ctx.http(),
-                            message.id,
-                            serenity::EditMessage::new()
-                                .content("Timed out")
-                                .embeds(vec![])
-                                .components(vec![]),
-                        )
-                        .await?;
-                    return Ok(());
-                }
-                ConfirmationResult::Declined(interaction) => {
-                    interaction
-                        .create_response(
-                            ctx.http(),
-                            serenity::CreateInteractionResponse::UpdateMessage(
-                                serenity::CreateInteractionResponseMessage::new()
-                                    .content("Note clear cancelled.")
-                                    .embeds(vec![])
-                                    .components(vec![]),
-                            ),
-                        )
-                        .await?;
-                    return Ok(());
-                }
-                ConfirmationResult::Confirmed(interaction) => {
-                    interaction
-                        .create_response(
-                            ctx.http(),
-                            serenity::CreateInteractionResponse::UpdateMessage(
-                                serenity::CreateInteractionResponseMessage::new()
-                                    .content("Clearing notes...")
-                                    .embeds(vec![])
-                                    .components(vec![]),
-                            ),
-                        )
-                        .await?;
-                        interaction
-                }
-                };
+            let Some(interaction) = resolve_confirmation_result(
+                ctx,
+                confirmation,
+                "Timed out",
+                "Note clear cancelled.",
+                "Clearing notes...",
+            )
+            .await?
+            else {
+                return Ok(());
+            };
 
             let removed = clear_user_notes(&ctx.data().db, guild_id.get(), user.id.get()).await?;
-                interaction
-                    .edit_response(
-                        ctx.http(),
-                        serenity::EditInteractionResponse::new()
-                            .content(format!("Cleared {} note(s) for <@{}>.", removed, user.id.get()))
-                            .embeds(vec![]),
-                    )
+            interaction
+                .edit_response(
+                    ctx.http(),
+                    serenity::EditInteractionResponse::new()
+                        .content(format!("Cleared {} note(s) for <@{}>.", removed, user.id.get()))
+                        .embeds(vec![]),
+                )
                 .await?;
             return Ok(());
         }

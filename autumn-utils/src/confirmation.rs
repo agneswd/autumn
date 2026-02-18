@@ -8,6 +8,63 @@ pub enum ConfirmationResult {
     TimedOut(serenity::Message),
 }
 
+pub async fn resolve_confirmation_result<U, E>(
+    ctx: poise::Context<'_, U, E>,
+    confirmation: ConfirmationResult,
+    timed_out_text: &str,
+    declined_text: &str,
+    processing_text: &str,
+) -> Result<Option<serenity::ComponentInteraction>, serenity::Error>
+where
+    U: Send + Sync,
+    E: Send + Sync,
+{
+    match confirmation {
+        ConfirmationResult::TimedOut(message) => {
+            message
+                .channel_id
+                .edit_message(
+                    ctx.http(),
+                    message.id,
+                    serenity::EditMessage::new()
+                        .content(timed_out_text)
+                        .embeds(vec![])
+                        .components(vec![]),
+                )
+                .await?;
+            Ok(None)
+        }
+        ConfirmationResult::Declined(interaction) => {
+            interaction
+                .create_response(
+                    ctx.http(),
+                    serenity::CreateInteractionResponse::UpdateMessage(
+                        serenity::CreateInteractionResponseMessage::new()
+                            .content(declined_text)
+                            .embeds(vec![])
+                            .components(vec![]),
+                    ),
+                )
+                .await?;
+            Ok(None)
+        }
+        ConfirmationResult::Confirmed(interaction) => {
+            interaction
+                .create_response(
+                    ctx.http(),
+                    serenity::CreateInteractionResponse::UpdateMessage(
+                        serenity::CreateInteractionResponseMessage::new()
+                            .content(processing_text)
+                            .embeds(vec![])
+                            .components(vec![]),
+                    ),
+                )
+                .await?;
+            Ok(Some(interaction))
+        }
+    }
+}
+
 pub async fn prompt_confirm_decline<U, E>(
     ctx: poise::Context<'_, U, E>,
     content: impl Into<String>,

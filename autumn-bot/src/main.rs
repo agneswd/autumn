@@ -49,7 +49,7 @@ async fn main() -> anyhow::Result<()> {
     info!("PostgreSQL connection established.");
     let db = Database::new(db_pool);
 
-    let auto_run_migrations = env_bool("AUTO_RUN_MIGRATIONS", false);
+    let auto_run_migrations = env_bool("AUTO_RUN_MIGRATIONS", true);
     if auto_run_migrations {
         MIGRATOR.run(db.pool()).await?;
         info!("Database migrations applied.");

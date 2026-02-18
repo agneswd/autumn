@@ -9,7 +9,7 @@ use crate::moderation::logging::create_case_and_publish;
 use autumn_core::{Context, Error};
 use autumn_database::impls::cases::NewCase;
 use autumn_database::impls::warnings::{clear_warnings, remove_warning_by_number};
-use autumn_utils::confirmation::{ConfirmationResult, prompt_confirm_decline};
+use autumn_utils::confirmation::{prompt_confirm_decline, resolve_confirmation_result};
 use autumn_utils::permissions::has_user_permission;
 
 pub const META: CommandMeta = CommandMeta {
@@ -73,49 +73,16 @@ pub async fn unwarn(
         )
         .await?;
 
-        let interaction = match confirmation {
-            ConfirmationResult::TimedOut(message) => {
-                message
-                    .channel_id
-                    .edit_message(
-                        ctx.http(),
-                        message.id,
-                        serenity::EditMessage::new()
-                            .content("Timed out")
-                            .embeds(vec![])
-                            .components(vec![]),
-                    )
-                    .await?;
-                return Ok(());
-            }
-            ConfirmationResult::Declined(interaction) => {
-                interaction
-                    .create_response(
-                        ctx.http(),
-                        serenity::CreateInteractionResponse::UpdateMessage(
-                            serenity::CreateInteractionResponseMessage::new()
-                                .content("Warning clear cancelled.")
-                                .embeds(vec![])
-                                .components(vec![]),
-                        ),
-                    )
-                    .await?;
-                return Ok(());
-            }
-            ConfirmationResult::Confirmed(interaction) => {
-                interaction
-                    .create_response(
-                        ctx.http(),
-                        serenity::CreateInteractionResponse::UpdateMessage(
-                            serenity::CreateInteractionResponseMessage::new()
-                                .content("Clearing warnings...")
-                                .embeds(vec![])
-                                .components(vec![]),
-                        ),
-                    )
-                    .await?;
-                interaction
-            }
+        let Some(interaction) = resolve_confirmation_result(
+            ctx,
+            confirmation,
+            "Timed out",
+            "Warning clear cancelled.",
+            "Clearing warnings...",
+        )
+        .await?
+        else {
+            return Ok(());
         };
 
         let removed = clear_warnings(&ctx.data().db, guild_id.get(), user.id.get()).await?;

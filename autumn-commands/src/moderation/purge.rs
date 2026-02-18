@@ -7,7 +7,7 @@ use crate::CommandMeta;
 use crate::moderation::logging::create_case_and_publish;
 use autumn_core::{Context, Error};
 use autumn_database::impls::cases::NewCase;
-use autumn_utils::confirmation::{ConfirmationResult, prompt_confirm_decline};
+use autumn_utils::confirmation::{prompt_confirm_decline, resolve_confirmation_result};
 use autumn_utils::permissions::has_user_permission;
 
 pub const META: CommandMeta = CommandMeta {
@@ -67,50 +67,17 @@ pub async fn purge(
     )
     .await?;
 
-    let interaction = match confirmation {
-        ConfirmationResult::TimedOut(message) => {
-            message
-                .channel_id
-                .edit_message(
-                    ctx.http(),
-                    message.id,
-                    serenity::EditMessage::new()
-                        .content("Timed out")
-                        .embeds(vec![])
-                        .components(vec![]),
-                )
-                .await?;
-            return Ok(());
-        }
-        ConfirmationResult::Declined(interaction) => {
-            interaction
-                .create_response(
-                    ctx.http(),
-                    serenity::CreateInteractionResponse::UpdateMessage(
-                        serenity::CreateInteractionResponseMessage::new()
-                            .content("Purge cancelled.")
-                            .embeds(vec![])
-                            .components(vec![]),
-                    ),
-                )
-                .await?;
-            return Ok(());
-        }
-        ConfirmationResult::Confirmed(interaction) => {
-            interaction
-                .create_response(
-                    ctx.http(),
-                    serenity::CreateInteractionResponse::UpdateMessage(
-                        serenity::CreateInteractionResponseMessage::new()
-                            .content("Purging...")
-                            .embeds(vec![])
-                            .components(vec![]),
-                    ),
-                )
-                .await?;
-                interaction
-        }
-            };
+    let Some(interaction) = resolve_confirmation_result(
+        ctx,
+        confirmation,
+        "Timed out",
+        "Purge cancelled.",
+        "Purging...",
+    )
+    .await?
+    else {
+        return Ok(());
+    };
 
     let channel_id = ctx.channel_id();
     let interaction_message_id = interaction.message.id;

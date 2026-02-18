@@ -5,6 +5,8 @@ use crate::utility::embeds::{
 use crate::{COMMANDS, CommandMeta};
 use autumn_core::{Context, Error};
 use autumn_utils::pagination::paginate_embed_pages;
+use autumn_utils::permissions::has_user_permission;
+use poise::serenity_prelude as serenity;
 
 pub const META: CommandMeta = CommandMeta {
     name: "help",
@@ -20,18 +22,39 @@ pub async fn help(
     ctx: Context<'_>,
     #[description = "Page number or category"] query: Option<String>,
 ) -> Result<(), Error> {
-    let query = query.as_deref();
-    let parsed_page = query.and_then(|raw| raw.parse::<usize>().ok().filter(|page| *page >= 1));
-    let category = match (query, parsed_page) {
-        (Some(raw), None) => Some(raw),
+    let query_trimmed = query.as_deref().map(str::trim).filter(|value| !value.is_empty());
+    let parsed_page = query_trimmed.and_then(|raw| raw.parse::<usize>().ok().filter(|page| *page >= 1));
+    let category = match (query_trimmed, parsed_page) {
+        (Some(raw), None) => Some(raw.to_ascii_lowercase()),
         _ => None,
     };
 
-    let mut categories: Vec<&str> = COMMANDS.iter().map(|c| c.category).collect();
+    let can_view_moderation = match ctx.guild_id() {
+        Some(guild_id) => has_user_permission(
+            ctx.http(),
+            guild_id,
+            ctx.author().id,
+            serenity::Permissions::MANAGE_MESSAGES,
+        )
+        .await?,
+        None => false,
+    };
+
+    if category.as_deref() == Some("moderation") && !can_view_moderation {
+        ctx.say("You need the Manage Messages permission to view moderation help.")
+            .await?;
+        return Ok(());
+    }
+
+    let mut categories: Vec<&str> = COMMANDS
+        .iter()
+        .filter(|cmd| cmd.category != "moderation" || can_view_moderation)
+        .map(|c| c.category)
+        .collect();
     categories.sort_unstable();
     categories.dedup();
 
-    if let Some(wanted_category) = category
+    if let Some(wanted_category) = category.as_deref()
         && !categories.contains(&wanted_category)
     {
         ctx.say(unknown_category_message(wanted_category, &categories))
@@ -39,9 +62,9 @@ pub async fn help(
         return Ok(());
     }
 
-    let commands = sorted_commands(category);
+    let commands = sorted_commands(category.as_deref());
     if commands.is_empty() {
-        ctx.say(no_commands_message(category)).await?;
+        ctx.say(no_commands_message(category.as_deref())).await?;
         return Ok(());
     }
 
@@ -82,7 +105,7 @@ fn sorted_commands(category: Option<&str>) -> Vec<&'static CommandMeta> {
         .iter()
         .filter(|cmd| match category {
             Some(wanted) => cmd.category == wanted,
-            None => true,
+            None => cmd.category != "moderation",
         })
         .collect();
 

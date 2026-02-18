@@ -94,3 +94,53 @@ pub fn event_display_name(event_type: &str) -> &'static str {
         _ => "Updated",
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{
+        action_display_name, event_display_name, format_case_label, format_compact_duration,
+        parse_case_label,
+    };
+
+    #[test]
+    fn formats_case_labels_uppercase() {
+        assert_eq!(format_case_label("w", 12), "W12");
+        assert_eq!(format_case_label("uwa", 3), "UWA3");
+    }
+
+    #[test]
+    fn parses_case_labels() {
+        assert_eq!(parse_case_label("w12"), Some(("W".to_owned(), 12)));
+        assert_eq!(parse_case_label("UWA3"), Some(("UWA".to_owned(), 3)));
+        assert_eq!(parse_case_label("  t5  "), Some(("T".to_owned(), 5)));
+        assert_eq!(parse_case_label("12"), None);
+        assert_eq!(parse_case_label("W0"), None);
+        assert_eq!(parse_case_label(""), None);
+    }
+
+    #[test]
+    fn action_names_are_user_friendly() {
+        assert_eq!(action_display_name("warn"), "Warned");
+        assert_eq!(action_display_name("unwarn_all"), "Unwarned All");
+        assert_eq!(action_display_name("custom_action"), "Custom_action");
+    }
+
+    #[test]
+    fn event_names_are_user_friendly() {
+        assert_eq!(event_display_name("created"), "Created");
+        assert_eq!(event_display_name("reason_updated"), "Reason Updated");
+        assert_eq!(event_display_name("note_added"), "Note Added");
+        assert_eq!(event_display_name("other"), "Updated");
+    }
+
+    #[test]
+    fn compact_duration_formatting() {
+        assert_eq!(format_compact_duration(59), "59s");
+        assert_eq!(format_compact_duration(60), "1m");
+        assert_eq!(format_compact_duration(61), "1m 1s");
+        assert_eq!(format_compact_duration(3600), "1h");
+        assert_eq!(format_compact_duration(3660), "1h 1m");
+        assert_eq!(format_compact_duration(86400), "1d");
+        assert_eq!(format_compact_duration(90000), "1d 1h");
+    }
+}
