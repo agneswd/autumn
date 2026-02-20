@@ -4,8 +4,7 @@ use poise::serenity_prelude as serenity;
 
 use crate::CommandMeta;
 use crate::moderation::embeds::{
-    guild_only_message, moderation_action_embed, permission_denied_message, target_profile_from_user,
-    usage_message,
+    guild_only_message, moderation_action_embed, target_profile_from_user, usage_message,
 };
 use crate::moderation::logging::create_case_and_publish;
 use autumn_core::{Context, Error};
@@ -38,7 +37,6 @@ pub async fn untimeout(
     )
     .await?
     {
-        ctx.say(permission_denied_message()).await?;
         return Ok(());
     }
 

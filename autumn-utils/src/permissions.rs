@@ -25,6 +25,11 @@ pub async fn resolve_user_permissions(
     guild_id: serenity::GuildId,
     user_id: serenity::UserId,
 ) -> anyhow::Result<serenity::Permissions> {
+    let guild = guild_id.to_partial_guild(http).await?;
+    if guild.owner_id == user_id {
+        return Ok(serenity::Permissions::all());
+    }
+
     let member = guild_id.member(http, user_id).await?;
     let roles = guild_id.roles(http).await?;
 

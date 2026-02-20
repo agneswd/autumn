@@ -41,8 +41,6 @@ pub async fn help(
     };
 
     if category.as_deref() == Some("moderation") && !can_view_moderation {
-        ctx.say("You need the Manage Messages permission to view moderation help.")
-            .await?;
         return Ok(());
     }
 

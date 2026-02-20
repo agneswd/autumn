@@ -1,7 +1,7 @@
 use poise::serenity_prelude as serenity;
 
 use crate::CommandMeta;
-use crate::moderation::embeds::{guild_only_message, permission_denied_message};
+use crate::moderation::embeds::guild_only_message;
 use autumn_core::{Context, Error};
 use autumn_database::impls::modlog_config::{
     clear_modlog_channel_id, get_modlog_channel_id, set_modlog_channel_id,
@@ -33,7 +33,6 @@ pub async fn modlogchannel(
     )
     .await?
     {
-        ctx.say(permission_denied_message()).await?;
         return Ok(());
     }
 

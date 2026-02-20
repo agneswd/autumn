@@ -30,7 +30,6 @@ pub async fn permissions(
     )
     .await?
     {
-        ctx.say("You are not permitted to use this command.").await?;
         return Ok(());
     }
 

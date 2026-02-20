@@ -2,7 +2,7 @@ use poise::serenity_prelude as serenity;
 use tracing::error;
 
 use crate::CommandMeta;
-use crate::moderation::embeds::{guild_only_message, permission_denied_message, usage_message};
+use crate::moderation::embeds::{guild_only_message, usage_message};
 use autumn_core::{Context, Error};
 use autumn_database::impls::cases::{
     add_case_note, get_case_by_label, get_case_events, update_case_reason,
@@ -40,7 +40,6 @@ pub async fn case(
     )
     .await?
     {
-        ctx.say(permission_denied_message()).await?;
         return Ok(());
     }
 

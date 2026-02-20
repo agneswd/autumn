@@ -2,7 +2,7 @@ use poise::serenity_prelude as serenity;
 
 use crate::CommandMeta;
 use crate::moderation::embeds::{
-    fetch_target_profile, guild_only_message, permission_denied_message, usage_message,
+    fetch_target_profile, guild_only_message, usage_message,
     warnings_window_label_days,
 };
 use autumn_core::{Context, Error};
@@ -44,7 +44,6 @@ pub async fn warnings(
     )
     .await?
     {
-        ctx.say(permission_denied_message()).await?;
         return Ok(());
     }
 

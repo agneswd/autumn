@@ -6,8 +6,8 @@ use poise::serenity_prelude as serenity;
 
 use crate::CommandMeta;
 use crate::moderation::embeds::{
-    guild_only_message, moderation_action_embed, moderation_permission_combo_denied_message,
-    moderation_self_action_message, target_profile_from_user, usage_message,
+    guild_only_message, moderation_action_embed, moderation_self_action_message,
+    target_profile_from_user, usage_message,
 };
 use crate::moderation::logging::create_case_and_publish;
 use autumn_core::{Context, Error};
@@ -43,8 +43,6 @@ pub async fn terminate(
 
     let required_permissions = serenity::Permissions::BAN_MEMBERS | serenity::Permissions::MANAGE_MESSAGES;
     if !has_user_permission(ctx.http(), guild_id, ctx.author().id, required_permissions).await? {
-        let denied = moderation_permission_combo_denied_message("Ban Members and Manage Messages");
-        ctx.say(denied).await?;
         return Ok(());
     }
 

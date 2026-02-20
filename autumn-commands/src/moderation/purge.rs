@@ -48,7 +48,6 @@ pub async fn purge(
     )
     .await?
     {
-        ctx.say("You are not permitted to use this command.").await?;
         return Ok(());
     }
 

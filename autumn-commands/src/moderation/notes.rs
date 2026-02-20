@@ -2,7 +2,7 @@ use poise::serenity_prelude as serenity;
 use std::time::Duration;
 
 use crate::CommandMeta;
-use crate::moderation::embeds::{guild_only_message, permission_denied_message};
+use crate::moderation::embeds::guild_only_message;
 use autumn_core::{Context, Error};
 use autumn_database::impls::notes::{add_user_note, clear_user_notes, list_user_notes};
 use autumn_utils::confirmation::{prompt_confirm_decline, resolve_confirmation_result};
@@ -38,7 +38,6 @@ pub async fn notes(
     )
     .await?
     {
-        ctx.say(permission_denied_message()).await?;
         return Ok(());
     }
 

@@ -76,14 +76,6 @@ pub fn guild_only_message() -> &'static str {
     "This command only works in servers."
 }
 
-pub fn permission_denied_message() -> &'static str {
-    "You are not permitted to use this command."
-}
-
-pub fn moderation_permission_combo_denied_message(required: &str) -> String {
-    format!("You need {required} permissions to use this command.")
-}
-
 pub fn moderation_self_action_message(action: &str) -> String {
     format!("You can't {action} yourself.")
 }

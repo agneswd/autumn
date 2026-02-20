@@ -1,7 +1,7 @@
 use poise::serenity_prelude as serenity;
 
 use crate::CommandMeta;
-use crate::moderation::embeds::{guild_only_message, permission_denied_message, usage_message};
+use crate::moderation::embeds::{guild_only_message, usage_message};
 use autumn_core::{Context, Error};
 use autumn_database::impls::cases::{CaseFilters, list_recent_cases};
 use autumn_utils::formatting::{action_display_name, format_case_label, format_compact_duration};
@@ -37,7 +37,6 @@ pub async fn modlogs(
     )
     .await?
     {
-        ctx.say(permission_denied_message()).await?;
         return Ok(());
     }
 

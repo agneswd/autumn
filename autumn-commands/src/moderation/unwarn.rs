@@ -3,7 +3,7 @@ use std::time::Duration;
 
 use crate::CommandMeta;
 use crate::moderation::embeds::{
-    guild_only_message, permission_denied_message, usage_message,
+    guild_only_message, usage_message,
 };
 use crate::moderation::logging::create_case_and_publish;
 use autumn_core::{Context, Error};
@@ -40,7 +40,6 @@ pub async fn unwarn(
     )
     .await?
     {
-        ctx.say(permission_denied_message()).await?;
         return Ok(());
     }
 
