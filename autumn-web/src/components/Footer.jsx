@@ -14,13 +14,13 @@ export default function Footer() {
 
                 <div className="flex flex-col md:flex-row items-center justify-between w-full border-t border-[#1A1A1A] pt-8">
                     <p className="font-mono text-xs text-background/50 mb-4 md:mb-0">
-                        © {new Date().getFullYear()} Agne9. MIT License.
+                        © {new Date().getFullYear()} agneswd - MIT License
                     </p>
 
                     <div className="flex gap-6 font-mono text-xs">
                         <Link to="/docs" className="text-background/50 hover:text-accent hover:-translate-y-px transition-all">Docs</Link>
                         <Link to="/docs/contributing" className="text-background/50 hover:text-accent hover:-translate-y-px transition-all">Contributing</Link>
-                        <a href="https://github.com/agne9/autumn" target="_blank" rel="noreferrer" className="text-background/50 hover:text-accent hover:-translate-y-px transition-all">GitHub</a>
+                        <a href="https://github.com/agneswd/autumn" target="_blank" rel="noreferrer" className="text-background/50 hover:text-accent hover:-translate-y-px transition-all">GitHub</a>
                     </div>
                 </div>
             </div>
