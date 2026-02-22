@@ -44,7 +44,7 @@ export default function Navbar() {
 
                 <div className="hidden md:flex">
                     <a
-                        href="https://github.com/agne9/autumn"
+                        href="https://github.com/agneswd/autumn"
                         target="_blank"
                         rel="noreferrer"
                         className="group relative overflow-hidden bg-white/10 hover:bg-white/20 text-background px-5 py-2 rounded-full font-sans text-sm font-medium transition-all duration-300 hover:scale-[1.03] flex items-center gap-2"
@@ -74,7 +74,7 @@ export default function Navbar() {
                     <Link to="/#protocol" onClick={() => setIsOpen(false)} className="font-mono text-sm text-background/80 hover:text-accent p-2">Protocol</Link>
                     <Link to="/docs" onClick={() => setIsOpen(false)} className="font-mono text-sm text-background/80 hover:text-accent p-2">Docs</Link>
                     <a
-                        href="https://github.com/agne9/autumn"
+                        href="https://github.com/agneswd/autumn"
                         target="_blank"
                         rel="noreferrer"
                         className="flex items-center justify-center gap-2 bg-white/10 text-background px-5 py-3 rounded-lg font-sans text-sm font-medium mt-2"
