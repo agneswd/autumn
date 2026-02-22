@@ -6,7 +6,7 @@ import tailwindcss from '@tailwindcss/vite'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-    base: '/autumn/',
+    base: '/',
     plugins: [
         { enforce: 'pre', ...mdx() },
         react(),
