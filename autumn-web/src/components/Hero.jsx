@@ -8,7 +8,7 @@ export default function Hero() {
     const containerRef = useRef(null);
 
     const handleCopy = () => {
-        navigator.clipboard.writeText("git clone https://github.com/agne9/autumn.git");
+        navigator.clipboard.writeText("git clone https://github.com/agneswd/autumn.git");
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
@@ -62,7 +62,7 @@ export default function Hero() {
                     <div className="flex items-center justify-between bg-[#121212] rounded py-4 px-4 md:px-6 gap-4">
                         <code className="font-mono text-xs sm:text-sm md:text-base text-background/90 group-hover:text-white transition-colors overflow-x-auto whitespace-nowrap scrollbar-hide">
                             <span className="text-accent inline-block mr-2 md:mr-3 select-none">$</span>
-                            git clone https://github.com/agne9/autumn.git
+                            git clone https://github.com/agneswd/autumn.git
                         </code>
                         <button
                             onClick={handleCopy}
