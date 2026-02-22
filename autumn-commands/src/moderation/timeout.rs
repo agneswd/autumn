@@ -14,7 +14,7 @@ use crate::moderation::logging::create_case_and_publish;
 use autumn_core::{Context, Error};
 use autumn_database::impls::cases::NewCase;
 use autumn_utils::formatting::format_compact_duration;
-use autumn_utils::parse::parse_duration_seconds;
+use autumn_utils::parse::{has_duration_unit, parse_duration_seconds};
 use autumn_utils::permissions::has_user_permission;
 
 pub const META: CommandMeta = CommandMeta {
@@ -25,6 +25,10 @@ pub const META: CommandMeta = CommandMeta {
 };
 
 const DEFAULT_TIMEOUT_SECS: u64 = 10 * 60;
+
+fn is_explicit_unit_duration_token(raw: &str) -> bool {
+    has_duration_unit(raw) && parse_duration_seconds(raw).is_some()
+}
 
 fn split_timeout_duration_and_reason(
     duration: Option<&str>,
@@ -46,7 +50,7 @@ fn split_timeout_duration_and_reason(
                 break;
             }
 
-            if collect_more_duration && parse_duration_seconds(token).is_some() {
+            if collect_more_duration && is_explicit_unit_duration_token(token) {
                 duration_parts.push(token.to_owned());
                 continue;
             }
