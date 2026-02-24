@@ -26,7 +26,7 @@ export default function Philosophy() {
     }, []);
 
     return (
-        <section ref={containerRef} className="relative w-full py-24 bg-primary flex flex-col items-center border-t border-[#1A1A1A]">
+        <section ref={containerRef} className="relative w-full pt-24 pb-10 bg-primary flex flex-col items-center border-t border-[#1A1A1A]">
             <div ref={contentRef} className="w-full max-w-4xl mx-auto px-6">
 
                 <div className="mb-12 flex flex-col items-center text-center">

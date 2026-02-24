@@ -38,7 +38,6 @@ export default function Navbar() {
                 {/* Desktop Menu */}
                 <div className="hidden md:flex items-center gap-8 font-mono text-sm text-background/70">
                     <Link to="/#features" className="hover:text-accent hover:-translate-y-[1px] transition-all">Features</Link>
-                    <Link to="/#protocol" className="hover:text-accent hover:-translate-y-[1px] transition-all">Protocol</Link>
                     <Link to="/docs" className="hover:text-accent hover:-translate-y-[1px] transition-all">Docs</Link>
                 </div>
 
@@ -71,7 +70,6 @@ export default function Navbar() {
             {isOpen && (
                 <div className="md:hidden absolute top-full left-0 w-full mt-2 bg-primary/95 backdrop-blur-xl border border-dark rounded-lg p-4 flex flex-col gap-4 shadow-xl">
                     <Link to="/#features" onClick={() => setIsOpen(false)} className="font-mono text-sm text-background/80 hover:text-accent p-2">Features</Link>
-                    <Link to="/#protocol" onClick={() => setIsOpen(false)} className="font-mono text-sm text-background/80 hover:text-accent p-2">Protocol</Link>
                     <Link to="/docs" onClick={() => setIsOpen(false)} className="font-mono text-sm text-background/80 hover:text-accent p-2">Docs</Link>
                     <a
                         href="https://github.com/agneswd/autumn"

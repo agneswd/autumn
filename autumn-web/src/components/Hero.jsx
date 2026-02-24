@@ -29,10 +29,10 @@ export default function Hero() {
     }, []);
 
     return (
-        <section ref={containerRef} className="w-full flex flex-col items-center justify-center pt-32 pb-24 px-4 sm:px-6">
+        <section ref={containerRef} className="w-full flex flex-col items-center justify-center overflow-x-hidden pt-32 pb-24 px-4 sm:px-6">
 
-            <div className="hero-reveal w-full max-w-4xl overflow-x-auto select-none mb-12 flex justify-center text-accent text-glow-accent">
-                <pre className="font-mono text-[10px] sm:text-xs md:text-sm lg:text-base leading-tight">
+            <div className="hero-reveal w-full max-w-4xl overflow-x-hidden select-none mb-12 flex justify-center text-accent text-glow-accent">
+                <pre className="max-w-full overflow-hidden font-mono text-[clamp(3px,1vw,14px)] leading-tight tracking-[-0.01em]">
                     {` █████╗ ██╗   ██╗████████╗██╗   ██╗███╗   ███╗███╗   ██╗
 ██╔══██╗██║   ██║╚══██╔══╝██║   ██║████╗ ████║████╗  ██║
 ███████║██║   ██║   ██║   ██║   ██║██╔████╔██║██╔██╗ ██║

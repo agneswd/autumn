@@ -5,6 +5,29 @@ import ContributingDocs from '../docs/contributing.mdx';
 export default function Contributing() {
     const { hash } = useLocation();
 
+    const sections = [
+        { id: 'how-to-contribute', title: 'How to Contribute' },
+        { id: 'community-guidelines', title: 'Community Guidelines' },
+        { id: 'support-the-project', title: 'Support the Project' },
+        { id: 'license', title: 'License' },
+        { id: 'getting-help', title: 'Getting Help' }
+    ];
+
+    useEffect(() => {
+        const h2Nodes = document.querySelectorAll('.prose h2');
+        h2Nodes.forEach((heading) => {
+            const text = heading.textContent?.trim();
+            if (!text) {
+                return;
+            }
+
+            const matching = sections.find((section) => section.title === text);
+            if (matching) {
+                heading.id = matching.id;
+            }
+        });
+    }, []);
+
     useEffect(() => {
         if (hash) {
             const element = document.getElementById(hash.replace('#', ''));
@@ -15,14 +38,6 @@ export default function Contributing() {
             window.scrollTo(0, 0);
         }
     }, [hash]);
-
-    const sections = [
-        { id: 'how-to-contribute', title: 'How to Contribute' },
-        { id: 'community-guidelines', title: 'Community Guidelines' },
-        { id: 'support-the-project', title: 'Support the Project' },
-        { id: 'license', title: 'License' },
-        { id: 'getting-help', title: 'Getting Help' }
-    ];
 
     return (
         <div className="w-full flex">
