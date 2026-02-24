@@ -15,6 +15,7 @@
 *.log
 
 # AI
+AGENTS.md
 SYSTEM_PROMPT.md
 
 # Local

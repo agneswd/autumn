@@ -1,18 +1,16 @@
-pub mod aitoggle;
-pub mod ban;
-pub mod case;
+#[path = "case/mod.rs"]
+mod case_group;
+#[path = "config/mod.rs"]
+mod config_group;
+#[path = "core/mod.rs"]
+mod core_group;
+#[path = "reversals/mod.rs"]
+mod reversals_group;
+
+pub use case_group::{case, modlogs, notes, warnings};
+pub use config_group::{aitoggle, modlogchannel, permissions};
+pub use core_group::{ban, kick, purge, terminate, timeout, warn};
+pub use reversals_group::{unban, untimeout, unwarn};
+
 mod embeds;
-pub mod kick;
 mod logging;
-pub mod modlogchannel;
-pub mod modlogs;
-pub mod notes;
-pub mod permissions;
-pub mod purge;
-pub mod terminate;
-pub mod timeout;
-pub mod unban;
-pub mod untimeout;
-pub mod unwarn;
-pub mod warn;
-pub mod warnings;
