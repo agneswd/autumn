@@ -5,9 +5,8 @@ use poise::serenity_prelude as serenity;
 use crate::CommandMeta;
 use crate::moderation::embeds::{
     guild_only_message, is_missing_permissions_error, moderation_action_embed,
-    moderation_bot_target_message,
-    send_moderation_target_dm_for_guild,
-    target_profile_from_user, usage_message,
+    moderation_bot_target_message, send_moderation_target_dm_for_guild, target_profile_from_user,
+    usage_message,
 };
 use crate::moderation::logging::create_case_and_publish;
 use autumn_core::{Context, Error};
@@ -25,7 +24,9 @@ pub const META: CommandMeta = CommandMeta {
 pub async fn ban(
     ctx: Context<'_>,
     #[description = "The user to ban"] user: Option<serenity::User>,
-    #[description = "Reason for the ban"] #[rest] reason: Option<String>,
+    #[description = "Reason for the ban"]
+    #[rest]
+    reason: Option<String>,
 ) -> Result<(), Error> {
     let Some(guild_id) = ctx.guild_id() else {
         ctx.say(guild_only_message()).await?;
@@ -59,7 +60,12 @@ pub async fn ban(
     }
 
     let ban_result = guild_id
-        .ban_with_reason(ctx.http(), user.id, 0, reason.as_deref().unwrap_or("No reason provided"))
+        .ban_with_reason(
+            ctx.http(),
+            user.id,
+            0,
+            reason.as_deref().unwrap_or("No reason provided"),
+        )
         .await;
 
     if let Err(source) = ban_result {
@@ -71,10 +77,7 @@ pub async fn ban(
         return Ok(());
     }
 
-    let case_reason = reason
-        .as_deref()
-        .unwrap_or("No reason provided")
-        .to_owned();
+    let case_reason = reason.as_deref().unwrap_or("No reason provided").to_owned();
 
     let _ = send_moderation_target_dm_for_guild(
         ctx.http(),
@@ -102,7 +105,8 @@ pub async fn ban(
     .await;
 
     let target_profile = target_profile_from_user(&user);
-    let mut embed = moderation_action_embed(&target_profile, user.id, "banned", reason.as_deref(), None);
+    let mut embed =
+        moderation_action_embed(&target_profile, user.id, "banned", reason.as_deref(), None);
     if let Some(case_label) = case_label {
         embed = embed.footer(serenity::CreateEmbedFooter::new(format!("#{}", case_label)));
     }

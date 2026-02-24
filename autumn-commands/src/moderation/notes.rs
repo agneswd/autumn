@@ -23,7 +23,9 @@ const NOTES_CLEAR_CONFIRM_TIMEOUT_SECS: u64 = 30;
 pub async fn notes(
     ctx: Context<'_>,
     #[description = "Target user"] user: Option<serenity::User>,
-    #[description = "Optional note to add"] #[rest] note: Option<String>,
+    #[description = "Optional note to add"]
+    #[rest]
+    note: Option<String>,
 ) -> Result<(), Error> {
     let Some(guild_id) = ctx.guild_id() else {
         ctx.say(guild_only_message()).await?;
@@ -78,7 +80,11 @@ pub async fn notes(
                 .edit_response(
                     ctx.http(),
                     serenity::EditInteractionResponse::new()
-                        .content(format!("Cleared {} note(s) for <@{}>.", removed, user.id.get()))
+                        .content(format!(
+                            "Cleared {} note(s) for <@{}>.",
+                            removed,
+                            user.id.get()
+                        ))
                         .embeds(vec![]),
                 )
                 .await?;
@@ -91,7 +97,8 @@ pub async fn notes(
         }
 
         if note.len() > 2000 {
-            ctx.say("Note content is too long (max 2000 characters).").await?;
+            ctx.say("Note content is too long (max 2000 characters).")
+                .await?;
             return Ok(());
         }
 
@@ -104,14 +111,18 @@ pub async fn notes(
         )
         .await?;
 
-        ctx.say(format!("Added note #{} for <@{}>.", saved_note.id, saved_note.target_user_id))
-            .await?;
+        ctx.say(format!(
+            "Added note #{} for <@{}>.",
+            saved_note.id, saved_note.target_user_id
+        ))
+        .await?;
         return Ok(());
     }
 
     let notes = list_user_notes(&ctx.data().db, guild_id.get(), user.id.get()).await?;
     if notes.is_empty() {
-        ctx.say(format!("No notes found for <@{}>.", user.id.get())).await?;
+        ctx.say(format!("No notes found for <@{}>.", user.id.get()))
+            .await?;
         return Ok(());
     }
 

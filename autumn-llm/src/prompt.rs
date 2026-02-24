@@ -1,7 +1,4 @@
-use std::{
-    fs,
-    path::Path,
-};
+use std::{fs, path::Path};
 
 const DEFAULT_SYSTEM_PROMPT: &str = "You are Autumn, a sarcastic but genuinely helpful Discord moderation assistant. \
 Keep answers concise, practical, and clear. Avoid hostility, harassment, and unsafe advice. \

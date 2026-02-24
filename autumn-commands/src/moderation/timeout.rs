@@ -7,8 +7,8 @@ use poise::serenity_prelude as serenity;
 use crate::CommandMeta;
 use crate::moderation::embeds::{
     guild_only_message, is_missing_permissions_error, moderation_action_embed,
-    moderation_bot_target_message,
-    send_moderation_target_dm_for_guild, target_profile_from_user, usage_message,
+    moderation_bot_target_message, send_moderation_target_dm_for_guild, target_profile_from_user,
+    usage_message,
 };
 use crate::moderation::logging::create_case_and_publish;
 use autumn_core::{Context, Error};
@@ -81,7 +81,9 @@ pub async fn timeout(
     ctx: Context<'_>,
     #[description = "The user to timeout"] user: Option<serenity::User>,
     #[description = "Duration (e.g. 10m, 2h)"] duration: Option<String>,
-    #[description = "Reason for timeout"] #[rest] reason: Option<String>,
+    #[description = "Reason for timeout"]
+    #[rest]
+    reason: Option<String>,
 ) -> Result<(), Error> {
     let Some(guild_id) = ctx.guild_id() else {
         ctx.say(guild_only_message()).await?;

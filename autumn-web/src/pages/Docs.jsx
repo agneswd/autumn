@@ -18,6 +18,7 @@ export default function Docs() {
             Component: SetupDocs,
             items: [
                 { id: 'modlogchannel', title: '!modlogchannel', heading: '!modlogchannel' },
+                { id: 'aitoggle', title: '!aitoggle', heading: '!aitoggle' },
             ],
         },
         {

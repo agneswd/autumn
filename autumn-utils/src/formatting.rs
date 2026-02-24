@@ -29,7 +29,11 @@ pub fn action_display_name(action: &str) -> String {
                     let mut chars = part.chars();
                     match chars.next() {
                         Some(first) => {
-                            format!("{}{}", first.to_uppercase(), chars.as_str().to_ascii_lowercase())
+                            format!(
+                                "{}{}",
+                                first.to_uppercase(),
+                                chars.as_str().to_ascii_lowercase()
+                            )
                         }
                         None => String::new(),
                     }

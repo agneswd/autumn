@@ -17,9 +17,11 @@ pub struct NewCase<'a> {
 }
 
 pub async fn ensure_case_schema_compat(db: &Database) -> anyhow::Result<()> {
-    sqlx::query("ALTER TABLE mod_cases ADD COLUMN IF NOT EXISTS case_code TEXT NOT NULL DEFAULT 'M'")
-        .execute(db.pool())
-        .await?;
+    sqlx::query(
+        "ALTER TABLE mod_cases ADD COLUMN IF NOT EXISTS case_code TEXT NOT NULL DEFAULT 'M'",
+    )
+    .execute(db.pool())
+    .await?;
 
     sqlx::query(
         "ALTER TABLE mod_cases ADD COLUMN IF NOT EXISTS action_case_number BIGINT NOT NULL DEFAULT 0",
@@ -385,7 +387,8 @@ pub async fn update_case_reason(
     let guild_id_i64 = i64::try_from(guild_id).context("guild_id out of i64 range")?;
     let action_case_number_i64 =
         i64::try_from(action_case_number).context("action_case_number out of i64 range")?;
-    let actor_user_id_i64 = i64::try_from(actor_user_id).context("actor_user_id out of i64 range")?;
+    let actor_user_id_i64 =
+        i64::try_from(actor_user_id).context("actor_user_id out of i64 range")?;
     let now = i64::try_from(now_unix_secs()).context("now out of i64 range")?;
 
     let mut tx = db.pool().begin().await?;
@@ -397,8 +400,8 @@ pub async fn update_case_reason(
          FOR UPDATE",
     )
     .bind(guild_id_i64)
-        .bind(case_code)
-        .bind(action_case_number_i64)
+    .bind(case_code)
+    .bind(action_case_number_i64)
     .fetch_optional(&mut *tx)
     .await?;
 
@@ -457,7 +460,8 @@ pub async fn add_case_note(
     let guild_id_i64 = i64::try_from(guild_id).context("guild_id out of i64 range")?;
     let action_case_number_i64 =
         i64::try_from(action_case_number).context("action_case_number out of i64 range")?;
-    let actor_user_id_i64 = i64::try_from(actor_user_id).context("actor_user_id out of i64 range")?;
+    let actor_user_id_i64 =
+        i64::try_from(actor_user_id).context("actor_user_id out of i64 range")?;
     let now = i64::try_from(now_unix_secs()).context("now out of i64 range")?;
 
     let mut tx = db.pool().begin().await?;

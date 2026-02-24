@@ -9,12 +9,12 @@
 .vscode/
 .idea/
 .DS_Store
+.copilot
 
 # Logs
 *.log
 
 # AI
-AGENTS.md
 SYSTEM_PROMPT.md
 
 # Local

@@ -1,3 +1,4 @@
+pub mod aitoggle;
 pub mod ban;
 pub mod case;
 mod embeds;
@@ -11,7 +12,7 @@ pub mod purge;
 pub mod terminate;
 pub mod timeout;
 pub mod unban;
-pub mod unwarn;
 pub mod untimeout;
+pub mod unwarn;
 pub mod warn;
 pub mod warnings;

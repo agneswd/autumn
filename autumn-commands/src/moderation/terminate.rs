@@ -33,14 +33,17 @@ pub async fn terminate(
     ctx: Context<'_>,
     #[description = "The user to terminate"] user: Option<serenity::User>,
     #[description = "Purge period (e.g. 7d) or reason"] period_or_reason: Option<String>,
-    #[description = "Reason"] #[rest] reason_rest: Option<String>,
+    #[description = "Reason"]
+    #[rest]
+    reason_rest: Option<String>,
 ) -> Result<(), Error> {
     let Some(guild_id) = ctx.guild_id() else {
         ctx.say(guild_only_message()).await?;
         return Ok(());
     };
 
-    let required_permissions = serenity::Permissions::BAN_MEMBERS | serenity::Permissions::MANAGE_MESSAGES;
+    let required_permissions =
+        serenity::Permissions::BAN_MEMBERS | serenity::Permissions::MANAGE_MESSAGES;
     if !has_user_permission(ctx.http(), guild_id, ctx.author().id, required_permissions).await? {
         return Ok(());
     }
@@ -139,22 +142,22 @@ pub async fn terminate(
         }
         ConfirmationResult::Declined(interaction) => {
             interaction
-            .create_response(
-                ctx.http(),
-                serenity::CreateInteractionResponse::UpdateMessage(
-                    serenity::CreateInteractionResponseMessage::new()
-                        .content("Termination cancelled.")
-                        .embed(moderation_action_embed(
-                            &target_profile,
-                            user.id,
-                            "left unchanged",
-                            Some("Termination cancelled."),
-                            None,
-                        ))
-                        .components(vec![]),
-                ),
-            )
-            .await?;
+                .create_response(
+                    ctx.http(),
+                    serenity::CreateInteractionResponse::UpdateMessage(
+                        serenity::CreateInteractionResponseMessage::new()
+                            .content("Termination cancelled.")
+                            .embed(moderation_action_embed(
+                                &target_profile,
+                                user.id,
+                                "left unchanged",
+                                Some("Termination cancelled."),
+                                None,
+                            ))
+                            .components(vec![]),
+                    ),
+                )
+                .await?;
             return Ok(());
         }
         ConfirmationResult::Confirmed(interaction) => interaction,
@@ -178,13 +181,14 @@ pub async fn terminate(
         )
         .await?;
 
-    if let Err(source) = guild_id.ban_with_reason(
-        ctx.http(),
-        user.id,
-        native_delete_days,
-        reason.as_deref().unwrap_or("No reason provided"),
-    )
-    .await
+    if let Err(source) = guild_id
+        .ban_with_reason(
+            ctx.http(),
+            user.id,
+            native_delete_days,
+            reason.as_deref().unwrap_or("No reason provided"),
+        )
+        .await
     {
         if !is_missing_permissions_error(&source) {
             error!(?source, "terminate ban failed");
@@ -229,10 +233,7 @@ pub async fn terminate(
         native_delete_days
     );
 
-    let case_reason = reason
-        .as_deref()
-        .unwrap_or("No reason provided")
-        .to_owned();
+    let case_reason = reason.as_deref().unwrap_or("No reason provided").to_owned();
 
     let case_label = create_case_and_publish(
         &ctx,
@@ -258,7 +259,8 @@ pub async fn terminate(
     );
 
     if let Some(case_label) = case_label {
-        final_embed = final_embed.footer(serenity::CreateEmbedFooter::new(format!("#{}", case_label)));
+        final_embed =
+            final_embed.footer(serenity::CreateEmbedFooter::new(format!("#{}", case_label)));
     }
 
     interaction

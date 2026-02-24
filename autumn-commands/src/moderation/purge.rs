@@ -54,13 +54,13 @@ pub async fn purge(
 
     let channel_id = ctx.channel_id();
     let messages = channel_id
-        .messages(ctx.http(), serenity::GetMessages::new().limit(delete_count as u8))
+        .messages(
+            ctx.http(),
+            serenity::GetMessages::new().limit(delete_count as u8),
+        )
         .await?;
 
-    let ids: Vec<serenity::MessageId> = messages
-        .into_iter()
-        .map(|message| message.id)
-        .collect();
+    let ids: Vec<serenity::MessageId> = messages.into_iter().map(|message| message.id).collect();
     let deleted_count = ids.len();
 
     if ids.is_empty() {

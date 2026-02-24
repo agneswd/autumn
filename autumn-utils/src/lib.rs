@@ -8,10 +8,10 @@ pub mod embed;
 pub mod formatting;
 /// Single source of truth for the message-command prefix.
 pub const COMMAND_PREFIX: char = '!';
-/// Pure parser helpers.
-pub mod parse;
 /// Shared pagination helper utilities.
 pub mod pagination;
+/// Pure parser helpers.
+pub mod parse;
 /// Permission helper utilities.
 pub mod permissions;
 /// Shared time helpers.

@@ -1,10 +1,6 @@
 use anyhow::Context as _;
 
-use crate::{
-    database::Database,
-    impls::warnings::now_unix_secs,
-    model::notes::UserNote,
-};
+use crate::{database::Database, impls::warnings::now_unix_secs, model::notes::UserNote};
 
 #[derive(sqlx::FromRow)]
 struct UserNoteRow {
@@ -26,8 +22,10 @@ pub async fn add_user_note(
     content: &str,
 ) -> anyhow::Result<UserNote> {
     let guild_id_i64 = i64::try_from(guild_id).context("guild_id out of i64 range")?;
-    let target_user_id_i64 = i64::try_from(target_user_id).context("target_user_id out of i64 range")?;
-    let author_user_id_i64 = i64::try_from(author_user_id).context("author_user_id out of i64 range")?;
+    let target_user_id_i64 =
+        i64::try_from(target_user_id).context("target_user_id out of i64 range")?;
+    let author_user_id_i64 =
+        i64::try_from(author_user_id).context("author_user_id out of i64 range")?;
     let now = i64::try_from(now_unix_secs()).context("now out of i64 range")?;
 
     let row: UserNoteRow = sqlx::query_as(
@@ -58,7 +56,8 @@ pub async fn list_user_notes(
     target_user_id: u64,
 ) -> anyhow::Result<Vec<UserNote>> {
     let guild_id_i64 = i64::try_from(guild_id).context("guild_id out of i64 range")?;
-    let target_user_id_i64 = i64::try_from(target_user_id).context("target_user_id out of i64 range")?;
+    let target_user_id_i64 =
+        i64::try_from(target_user_id).context("target_user_id out of i64 range")?;
 
     let rows: Vec<UserNoteRow> = sqlx::query_as(
         "SELECT id, guild_id, target_user_id, author_user_id, content, created_at, updated_at, deleted_at
@@ -141,9 +140,14 @@ pub async fn delete_user_note(db: &Database, guild_id: u64, note_id: u64) -> any
     Ok(updated > 0)
 }
 
-pub async fn clear_user_notes(db: &Database, guild_id: u64, target_user_id: u64) -> anyhow::Result<u64> {
+pub async fn clear_user_notes(
+    db: &Database,
+    guild_id: u64,
+    target_user_id: u64,
+) -> anyhow::Result<u64> {
     let guild_id_i64 = i64::try_from(guild_id).context("guild_id out of i64 range")?;
-    let target_user_id_i64 = i64::try_from(target_user_id).context("target_user_id out of i64 range")?;
+    let target_user_id_i64 =
+        i64::try_from(target_user_id).context("target_user_id out of i64 range")?;
     let now = i64::try_from(now_unix_secs()).context("now out of i64 range")?;
 
     let updated = sqlx::query(
@@ -165,8 +169,10 @@ fn to_user_note(row: UserNoteRow) -> anyhow::Result<UserNote> {
     Ok(UserNote {
         id: u64::try_from(row.id).context("id row out of u64 range")?,
         guild_id: u64::try_from(row.guild_id).context("guild_id row out of u64 range")?,
-        target_user_id: u64::try_from(row.target_user_id).context("target_user_id row out of u64 range")?,
-        author_user_id: u64::try_from(row.author_user_id).context("author_user_id row out of u64 range")?,
+        target_user_id: u64::try_from(row.target_user_id)
+            .context("target_user_id row out of u64 range")?,
+        author_user_id: u64::try_from(row.author_user_id)
+            .context("author_user_id row out of u64 range")?,
         content: row.content,
         created_at: u64::try_from(row.created_at).context("created_at row out of u64 range")?,
         updated_at: u64::try_from(row.updated_at).context("updated_at row out of u64 range")?,

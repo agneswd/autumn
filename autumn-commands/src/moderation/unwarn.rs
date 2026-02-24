@@ -2,9 +2,7 @@ use poise::serenity_prelude as serenity;
 use std::time::Duration;
 
 use crate::CommandMeta;
-use crate::moderation::embeds::{
-    guild_only_message, moderation_bot_target_message, usage_message,
-};
+use crate::moderation::embeds::{guild_only_message, moderation_bot_target_message, usage_message};
 use crate::moderation::logging::create_case_and_publish;
 use autumn_core::{Context, Error};
 use autumn_database::impls::cases::NewCase;
@@ -53,11 +51,7 @@ pub async fn unwarn(
         return Ok(());
     }
 
-    let target_label = user
-        .global_name
-        .as_deref()
-        .unwrap_or(&user.name)
-        .to_owned();
+    let target_label = user.global_name.as_deref().unwrap_or(&user.name).to_owned();
 
     let Some(selector) = selector.as_deref() else {
         ctx.say(usage_message(META.usage)).await?;
@@ -123,18 +117,20 @@ pub async fn unwarn(
         interaction
             .edit_response(
                 ctx.http(),
-                serenity::EditInteractionResponse::new().content(format!(
-                    "Removed {} warning(s) for {}.",
-                    removed, target_label
-                ))
-                .embeds(vec![]),
+                serenity::EditInteractionResponse::new()
+                    .content(format!(
+                        "Removed {} warning(s) for {}.",
+                        removed, target_label
+                    ))
+                    .embeds(vec![]),
             )
-        .await?;
+            .await?;
         return Ok(());
     }
 
     let Ok(warning_number) = selector.parse::<usize>() else {
-        ctx.say("Selector must be a warning number or 'all'.").await?;
+        ctx.say("Selector must be a warning number or 'all'.")
+            .await?;
         return Ok(());
     };
 

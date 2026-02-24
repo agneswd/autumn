@@ -5,13 +5,12 @@ use crate::database::Database;
 pub async fn get_modlog_channel_id(db: &Database, guild_id: u64) -> anyhow::Result<Option<u64>> {
     let guild_id_i64 = i64::try_from(guild_id).context("guild_id out of i64 range")?;
 
-    let channel_id: Option<i64> = sqlx::query_scalar(
-        "SELECT modlog_channel_id FROM guild_mod_config WHERE guild_id = $1",
-    )
-    .bind(guild_id_i64)
-    .fetch_optional(db.pool())
-    .await?
-    .flatten();
+    let channel_id: Option<i64> =
+        sqlx::query_scalar("SELECT modlog_channel_id FROM guild_mod_config WHERE guild_id = $1")
+            .bind(guild_id_i64)
+            .fetch_optional(db.pool())
+            .await?
+            .flatten();
 
     channel_id
         .map(u64::try_from)

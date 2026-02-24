@@ -112,7 +112,8 @@ pub async fn remove_warning_by_number(
 ) -> anyhow::Result<bool> {
     let guild_id_i64 = i64::try_from(guild_id).context("guild_id out of i64 range")?;
     let user_id_i64 = i64::try_from(user_id).context("user_id out of i64 range")?;
-    let warning_number_i64 = i64::try_from(warning_number).context("warning_number out of i64 range")?;
+    let warning_number_i64 =
+        i64::try_from(warning_number).context("warning_number out of i64 range")?;
 
     let deleted_row: Option<i64> = sqlx::query_scalar(
         "WITH ranked AS (

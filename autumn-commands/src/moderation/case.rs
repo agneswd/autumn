@@ -25,7 +25,9 @@ pub async fn case(
     ctx: Context<'_>,
     #[description = "Case id (e.g. W1, B3)"] case_id: Option<String>,
     #[description = "Optional action: reason or note"] action: Option<String>,
-    #[description = "Text for the selected action"] #[rest] value: Option<String>,
+    #[description = "Text for the selected action"]
+    #[rest]
+    value: Option<String>,
 ) -> Result<(), Error> {
     let Some(guild_id) = ctx.guild_id() else {
         ctx.say(guild_only_message()).await?;
@@ -56,7 +58,8 @@ pub async fn case(
     if let Some(action) = action.as_deref().map(str::trim) {
         if action.eq_ignore_ascii_case("reason") {
             let Some(new_reason) = value.map(|entry| entry.trim().to_owned()) else {
-                ctx.say("Usage: `!case <case_id> reason <new reason>`").await?;
+                ctx.say("Usage: `!case <case_id> reason <new reason>`")
+                    .await?;
                 return Ok(());
             };
 
@@ -85,13 +88,19 @@ pub async fn case(
             };
 
             if updated.is_none() {
-                ctx.say(format!("Case {}{} was not found.", case_code, action_case_number))
-                    .await?;
+                ctx.say(format!(
+                    "Case {}{} was not found.",
+                    case_code, action_case_number
+                ))
+                .await?;
                 return Ok(());
             }
 
-            ctx.say(format!("Updated reason for #{}{}.", case_code, action_case_number))
-                .await?;
+            ctx.say(format!(
+                "Updated reason for #{}{}.",
+                case_code, action_case_number
+            ))
+            .await?;
             return Ok(());
         }
 
@@ -126,13 +135,19 @@ pub async fn case(
             };
 
             if !added {
-                ctx.say(format!("Case {}{} was not found.", case_code, action_case_number))
-                    .await?;
+                ctx.say(format!(
+                    "Case {}{} was not found.",
+                    case_code, action_case_number
+                ))
+                .await?;
                 return Ok(());
             }
 
-            ctx.say(format!("Added note to #{}{}.", case_code, action_case_number))
-                .await?;
+            ctx.say(format!(
+                "Added note to #{}{}.",
+                case_code, action_case_number
+            ))
+            .await?;
             return Ok(());
         }
 
@@ -140,7 +155,13 @@ pub async fn case(
         return Ok(());
     }
 
-    let case = get_case_by_label(&ctx.data().db, guild_id.get(), &case_code, action_case_number).await;
+    let case = get_case_by_label(
+        &ctx.data().db,
+        guild_id.get(),
+        &case_code,
+        action_case_number,
+    )
+    .await;
     let Some(case) = (match case {
         Ok(case) => case,
         Err(source) => {
@@ -149,11 +170,22 @@ pub async fn case(
             return Ok(());
         }
     }) else {
-        ctx.say(format!("Case {}{} was not found.", case_code, action_case_number)).await?;
+        ctx.say(format!(
+            "Case {}{} was not found.",
+            case_code, action_case_number
+        ))
+        .await?;
         return Ok(());
     };
 
-    let events = match get_case_events(&ctx.data().db, guild_id.get(), &case_code, action_case_number).await {
+    let events = match get_case_events(
+        &ctx.data().db,
+        guild_id.get(),
+        &case_code,
+        action_case_number,
+    )
+    .await
+    {
         Ok(events) => events,
         Err(source) => {
             error!(?source, "case events load failed");
@@ -168,7 +200,10 @@ pub async fn case(
         fields.push(format!("Target : <@{}>", target_user_id));
     }
 
-    fields.push(format!("Reason : {}", case.reason.replace('@', "@\u{200B}")));
+    fields.push(format!(
+        "Reason : {}",
+        case.reason.replace('@', "@\u{200B}")
+    ));
     fields.push(format!("Moderator : <@{}>", case.moderator_user_id));
 
     if let Some(duration_seconds) = case.duration_seconds {

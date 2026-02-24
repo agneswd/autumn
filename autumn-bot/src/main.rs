@@ -2,19 +2,20 @@ use std::env;
 
 use poise::serenity_prelude as serenity;
 use tracing::{debug, error, info};
+use tracing_subscriber::Layer;
 use tracing_subscriber::filter::filter_fn;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
-use tracing_subscriber::Layer;
 
 use rustls::crypto::ring::default_provider;
 use sqlx::postgres::PgPoolOptions;
 
-use autumn_llm::LlmService;
 use autumn_core::{Data, Error};
-use autumn_database::{Database, MIGRATOR};
-use autumn_database::impls::llm_chat::insert_llm_chat_message;
+use autumn_database::impls::ai_config::get_llm_enabled;
 use autumn_database::impls::cases::ensure_case_schema_compat;
+use autumn_database::impls::llm_chat::insert_llm_chat_message;
+use autumn_database::{Database, MIGRATOR};
+use autumn_llm::LlmService;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -50,7 +51,12 @@ async fn main() -> anyhow::Result<()> {
         .await?;
     info!("PostgreSQL connection established.");
     let db = Database::new(db_pool);
-    let llm = LlmService::from_env()?;
+    let llm = LlmService::from_env_optional()?;
+    if llm.is_some() {
+        info!("LLM integration enabled.");
+    } else {
+        info!("LLM integration disabled (missing/empty OLLAMA_* vars or OLLAMA_ENABLED=false).");
+    }
 
     let auto_run_migrations = env_bool("AUTO_RUN_MIGRATIONS", true);
     if auto_run_migrations {
@@ -111,7 +117,10 @@ async fn main() -> anyhow::Result<()> {
 
 fn env_bool(key: &str, default: bool) -> bool {
     match env::var(key) {
-        Ok(value) => matches!(value.trim().to_ascii_lowercase().as_str(), "1" | "true" | "yes" | "on"),
+        Ok(value) => matches!(
+            value.trim().to_ascii_lowercase().as_str(),
+            "1" | "true" | "yes" | "on"
+        ),
         Err(_) => default,
     }
 }
@@ -127,11 +136,7 @@ async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
                 .color(autumn_utils::embed::DEFAULT_EMBED_COLOR);
 
             let _ = ctx
-                .send(
-                    poise::CreateReply::default()
-                        .ephemeral(true)
-                        .embed(embed),
-                )
+                .send(poise::CreateReply::default().ephemeral(true).embed(embed))
                 .await;
         }
         poise::FrameworkError::UnknownCommand { .. } => {
@@ -161,6 +166,22 @@ async fn handle_event(
         return Ok(());
     };
 
+    let Some(llm) = data.llm.as_ref() else {
+        return Ok(());
+    };
+
+    let llm_enabled = match get_llm_enabled(&data.db, guild_id.get()).await {
+        Ok(enabled) => enabled,
+        Err(source) => {
+            error!(?source, "failed to read guild AI config");
+            return Ok(());
+        }
+    };
+
+    if !llm_enabled {
+        return Ok(());
+    }
+
     let mentions_bot = match new_message.mentions_me(ctx).await {
         Ok(value) => value,
         Err(source) => {
@@ -176,7 +197,9 @@ async fn handle_event(
     let bot_user_id = ctx.cache.current_user().id;
     let author_display_name = message_display_name(new_message);
     let bot_display_name = ctx.cache.current_user().name.clone();
-    let prompt = strip_bot_mention(&new_message.content, bot_user_id).trim().to_owned();
+    let prompt = strip_bot_mention(&new_message.content, bot_user_id)
+        .trim()
+        .to_owned();
 
     if prompt.is_empty() {
         new_message.reply(&ctx.http, "a?").await?;
@@ -185,8 +208,7 @@ async fn handle_event(
 
     let _ = new_message.channel_id.broadcast_typing(&ctx.http).await;
 
-    let llm_reply = match data
-        .llm
+    let llm_reply = match llm
         .generate_channel_reply(
             &data.db,
             guild_id.get(),
@@ -249,12 +271,11 @@ fn strip_bot_mention(content: &str, bot_user_id: serenity::UserId) -> String {
 }
 
 fn message_display_name(message: &serenity::Message) -> String {
-    if let Some(member) = &message.member {
-        if let Some(nick) = &member.nick
-            && !nick.trim().is_empty()
-        {
-            return nick.clone();
-        }
+    if let Some(member) = &message.member
+        && let Some(nick) = &member.nick
+        && !nick.trim().is_empty()
+    {
+        return nick.clone();
     }
 
     if let Some(global_name) = &message.author.global_name

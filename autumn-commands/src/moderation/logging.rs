@@ -24,7 +24,10 @@ pub async fn create_case_and_publish(
     };
 
     if let Err(source) = publish_case_to_modlog_channel(ctx, guild_id, &case).await {
-        error!(?source, "failed to publish case to configured modlog channel");
+        error!(
+            ?source,
+            "failed to publish case to configured modlog channel"
+        );
     }
 
     Some(format_case_label(&case.case_code, case.action_case_number))
@@ -55,7 +58,10 @@ async fn publish_case_to_modlog_channel(
         fields.push(format!("**Target :** <@{}>", target_user_id));
     }
 
-    fields.push(format!("**Reason :** {}", case.reason.replace('@', "@\u{200B}")));
+    fields.push(format!(
+        "**Reason :** {}",
+        case.reason.replace('@', "@\u{200B}")
+    ));
 
     if let Some(duration_seconds) = case.duration_seconds {
         fields.push(format!(

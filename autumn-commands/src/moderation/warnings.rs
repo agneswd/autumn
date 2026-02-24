@@ -2,8 +2,7 @@ use poise::serenity_prelude as serenity;
 
 use crate::CommandMeta;
 use crate::moderation::embeds::{
-    fetch_target_profile, guild_only_message, usage_message,
-    warnings_window_label_days,
+    fetch_target_profile, guild_only_message, usage_message, warnings_window_label_days,
 };
 use autumn_core::{Context, Error};
 use autumn_database::impls::warnings::{now_unix_secs, warnings_since};
@@ -65,7 +64,10 @@ pub async fn warnings(
     let target_profile = fetch_target_profile(ctx.http(), user.id).await;
 
     if entries.is_empty() {
-        let page = format!("Total warnings in {}: **0**\n\nNo warnings in this period.", window_label);
+        let page = format!(
+            "Total warnings in {}: **0**\n\nNo warnings in this period.",
+            window_label
+        );
         paginate_embed_pages_with_icon(
             ctx,
             &format!("Warnings for {}", target_profile.display_name),

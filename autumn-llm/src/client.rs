@@ -1,17 +1,11 @@
 use std::env;
 
 use anyhow::Context as _;
+use autumn_database::{Database, impls::llm_chat::list_recent_llm_chat_messages};
 use ollama_rs::{
     Ollama,
-    generation::chat::{
-        ChatMessage,
-        request::ChatMessageRequest,
-    },
+    generation::chat::{ChatMessage, request::ChatMessageRequest},
     models::ModelOptions,
-};
-use autumn_database::{
-    Database,
-    impls::llm_chat::list_recent_llm_chat_messages,
 };
 
 #[derive(Clone, Debug)]
@@ -21,13 +15,51 @@ pub struct LlmService {
 }
 
 impl LlmService {
+    pub fn from_env_optional() -> anyhow::Result<Option<Self>> {
+        let enabled = env::var("OLLAMA_ENABLED")
+            .ok()
+            .map(|value| {
+                matches!(
+                    value.trim().to_ascii_lowercase().as_str(),
+                    "1" | "true" | "yes" | "on"
+                )
+            })
+            .unwrap_or(true);
+
+        if !enabled {
+            return Ok(None);
+        }
+
+        let host_raw = env::var("OLLAMA_HOST").ok();
+        let port_raw = env::var("OLLAMA_PORT").ok();
+        let model_raw = env::var("OLLAMA_MODEL").ok();
+
+        let host = host_raw.as_deref().map(str::trim).unwrap_or_default();
+        let port = port_raw.as_deref().map(str::trim).unwrap_or_default();
+        let model = model_raw.as_deref().map(str::trim).unwrap_or_default();
+
+        if host.is_empty() && port.is_empty() && model.is_empty() {
+            return Ok(None);
+        }
+
+        Ok(Some(Self::from_env()?))
+    }
+
     pub fn from_env() -> anyhow::Result<Self> {
-        let host = env::var("OLLAMA_HOST").unwrap_or_else(|_| "http://127.0.0.1".to_owned());
+        let host = env::var("OLLAMA_HOST")
+            .ok()
+            .map(|value| value.trim().to_owned())
+            .filter(|value| !value.is_empty())
+            .unwrap_or_else(|| "http://127.0.0.1".to_owned());
         let port = env::var("OLLAMA_PORT")
             .ok()
             .and_then(|value| value.parse::<u16>().ok())
             .unwrap_or(11434);
-        let model = env::var("OLLAMA_MODEL").unwrap_or_else(|_| "gpt-oss:20b-cloud".to_owned());
+        let model = env::var("OLLAMA_MODEL")
+            .ok()
+            .map(|value| value.trim().to_owned())
+            .filter(|value| !value.is_empty())
+            .unwrap_or_else(|| "gpt-oss:20b-cloud".to_owned());
 
         let client = Ollama::new(host, port);
         Ok(Self { client, model })
@@ -65,12 +97,11 @@ impl LlmService {
         );
         messages.push(ChatMessage::user(priority_prompt));
 
-        let request = ChatMessageRequest::new(self.model.clone(), messages)
-            .options(
-                ModelOptions::default()
-                    .temperature(0.75)
-                    .repeat_penalty(1.2)
-            );
+        let request = ChatMessageRequest::new(self.model.clone(), messages).options(
+            ModelOptions::default()
+                .temperature(0.75)
+                .repeat_penalty(1.2),
+        );
         let response = self
             .client
             .send_chat_messages(request)
@@ -81,11 +112,7 @@ impl LlmService {
     }
 }
 
-fn format_history_content(
-    role: &str,
-    display_name: Option<&str>,
-    content: &str,
-) -> String {
+fn format_history_content(role: &str, display_name: Option<&str>, content: &str) -> String {
     let normalized_name = display_name
         .map(str::trim)
         .filter(|name| !name.is_empty())

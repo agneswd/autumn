@@ -2,10 +2,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use anyhow::Context as _;
 
-use crate::{
-    database::Database,
-    model::llm_chat::LlmChatEntry,
-};
+use crate::{database::Database, model::llm_chat::LlmChatEntry};
 
 #[derive(sqlx::FromRow)]
 struct LlmChatRow {

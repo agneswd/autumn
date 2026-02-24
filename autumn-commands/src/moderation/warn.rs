@@ -22,7 +22,9 @@ pub const META: CommandMeta = CommandMeta {
 pub async fn warn(
     ctx: Context<'_>,
     #[description = "The user to warn"] user: Option<serenity::User>,
-    #[description = "Reason for warning"] #[rest] reason: Option<String>,
+    #[description = "Reason for warning"]
+    #[rest]
+    reason: Option<String>,
 ) -> Result<(), Error> {
     let Some(guild_id) = ctx.guild_id() else {
         ctx.say(guild_only_message()).await?;

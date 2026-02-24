@@ -28,3 +28,24 @@ Set, view, or clear the moderation log channel for the current server.
 - With no argument, shows the currently configured modlog channel.
 
 If no modlog channel is configured, moderation actions still work; they just won’t be mirrored to a dedicated modlog channel.
+
+---
+
+## `!aitoggle`
+Enable or disable AI mention replies for the current server.
+
+**Usage:**
+```bash
+!aitoggle <on|off|status>
+```
+
+**Permission required:** `Manage Server`
+
+**Examples:**
+```bash
+!aitoggle status
+!aitoggle off
+!aitoggle on
+```
+
+When set to `off`, Autumn will ignore mention-triggered LLM replies for that guild even if Ollama is configured.

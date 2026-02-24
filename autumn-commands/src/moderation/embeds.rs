@@ -10,12 +10,18 @@ pub struct TargetProfile {
 
 pub fn target_profile_from_user(user: &serenity::User) -> TargetProfile {
     TargetProfile {
-        display_name: user.global_name.clone().unwrap_or_else(|| user.name.clone()),
+        display_name: user
+            .global_name
+            .clone()
+            .unwrap_or_else(|| user.name.clone()),
         avatar_url: Some(user.face()),
     }
 }
 
-pub async fn fetch_target_profile(http: &serenity::Http, user_id: serenity::UserId) -> TargetProfile {
+pub async fn fetch_target_profile(
+    http: &serenity::Http,
+    user_id: serenity::UserId,
+) -> TargetProfile {
     match http.get_user(user_id).await {
         Ok(user) => target_profile_from_user(&user),
         Err(_) => TargetProfile {
@@ -43,7 +49,11 @@ pub fn moderation_action_embed(
             reason,
             duration
         ),
-        None => format!("**Target :** <@{}>\n**Reason :** {}", target_user_id.get(), reason),
+        None => format!(
+            "**Target :** <@{}>\n**Reason :** {}",
+            target_user_id.get(),
+            reason
+        ),
     };
 
     let mut embed = serenity::CreateEmbed::new()

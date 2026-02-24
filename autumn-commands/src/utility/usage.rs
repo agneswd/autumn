@@ -28,9 +28,11 @@ pub async fn usage(
         return Ok(());
     };
 
-    if let (Some(guild_id), Some(required_permissions)) =
-        (ctx.guild_id(), required_permissions_for_command(command.name))
-        && !has_user_permission(ctx.http(), guild_id, ctx.author().id, required_permissions).await?
+    if let (Some(guild_id), Some(required_permissions)) = (
+        ctx.guild_id(),
+        required_permissions_for_command(command.name),
+    ) && !has_user_permission(ctx.http(), guild_id, ctx.author().id, required_permissions)
+        .await?
     {
         return Ok(());
     }
@@ -44,9 +46,10 @@ fn required_permissions_for_command(command_name: &str) -> Option<serenity::Perm
         "ban" | "unban" => Some(serenity::Permissions::BAN_MEMBERS),
         "kick" => Some(serenity::Permissions::KICK_MEMBERS),
         "timeout" | "untimeout" => Some(serenity::Permissions::MODERATE_MEMBERS),
-        "warn" | "warnings" | "unwarn" | "purge" | "permissions" | "modlogs" | "case"
-        | "notes" => Some(serenity::Permissions::MANAGE_MESSAGES),
-        "modlogchannel" => Some(serenity::Permissions::MANAGE_GUILD),
+        "warn" | "warnings" | "unwarn" | "purge" | "permissions" | "modlogs" | "case" | "notes" => {
+            Some(serenity::Permissions::MANAGE_MESSAGES)
+        }
+        "modlogchannel" | "aitoggle" => Some(serenity::Permissions::MANAGE_GUILD),
         "terminate" => {
             Some(serenity::Permissions::BAN_MEMBERS | serenity::Permissions::MANAGE_MESSAGES)
         }

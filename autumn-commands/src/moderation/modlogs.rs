@@ -40,7 +40,10 @@ pub async fn modlogs(
         return Ok(());
     }
 
-    if action.as_deref().is_some_and(|value| value.trim().is_empty()) {
+    if action
+        .as_deref()
+        .is_some_and(|value| value.trim().is_empty())
+    {
         ctx.say(usage_message(META.usage)).await?;
         return Ok(());
     }
@@ -51,7 +54,10 @@ pub async fn modlogs(
         CaseFilters {
             target_user_id: target_user.as_ref().map(|user| user.id.get()),
             moderator_user_id: moderator.as_ref().map(|user| user.id.get()),
-            action: action.as_deref().map(str::trim).filter(|value| !value.is_empty()),
+            action: action
+                .as_deref()
+                .map(str::trim)
+                .filter(|value| !value.is_empty()),
             limit: 200,
         },
     )
@@ -81,7 +87,10 @@ pub async fn modlogs(
                 fields.push(format!("**Target :** <@{}>", target_user_id));
             }
 
-            fields.push(format!("**Reason :** {}", case.reason.replace('@', "@\u{200B}")));
+            fields.push(format!(
+                "**Reason :** {}",
+                case.reason.replace('@', "@\u{200B}")
+            ));
 
             if let Some(duration_seconds) = case.duration_seconds {
                 fields.push(format!(

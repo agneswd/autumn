@@ -22,21 +22,27 @@ pub async fn help(
     ctx: Context<'_>,
     #[description = "Page number or category"] query: Option<String>,
 ) -> Result<(), Error> {
-    let query_trimmed = query.as_deref().map(str::trim).filter(|value| !value.is_empty());
-    let parsed_page = query_trimmed.and_then(|raw| raw.parse::<usize>().ok().filter(|page| *page >= 1));
+    let query_trimmed = query
+        .as_deref()
+        .map(str::trim)
+        .filter(|value| !value.is_empty());
+    let parsed_page =
+        query_trimmed.and_then(|raw| raw.parse::<usize>().ok().filter(|page| *page >= 1));
     let category = match (query_trimmed, parsed_page) {
         (Some(raw), None) => Some(raw.to_ascii_lowercase()),
         _ => None,
     };
 
     let can_view_moderation = match ctx.guild_id() {
-        Some(guild_id) => has_user_permission(
-            ctx.http(),
-            guild_id,
-            ctx.author().id,
-            serenity::Permissions::MANAGE_MESSAGES,
-        )
-        .await?,
+        Some(guild_id) => {
+            has_user_permission(
+                ctx.http(),
+                guild_id,
+                ctx.author().id,
+                serenity::Permissions::MANAGE_MESSAGES,
+            )
+            .await?
+        }
         None => false,
     };
 
@@ -70,7 +76,8 @@ pub async fn help(
     let total = total_pages(commands.len(), HELP_COMMANDS_PER_PAGE);
 
     if requested_page > total {
-        ctx.say(page_out_of_range_message(requested_page, total)).await?;
+        ctx.say(page_out_of_range_message(requested_page, total))
+            .await?;
         return Ok(());
     }
 

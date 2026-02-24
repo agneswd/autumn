@@ -18,7 +18,9 @@ pub const META: CommandMeta = CommandMeta {
 #[poise::command(prefix_command, slash_command, category = "Moderation")]
 pub async fn modlogchannel(
     ctx: Context<'_>,
-    #[description = "Channel mention/id, or 'clear'"] #[rest] input: Option<String>,
+    #[description = "Channel mention/id, or 'clear'"]
+    #[rest]
+    input: Option<String>,
 ) -> Result<(), Error> {
     let Some(guild_id) = ctx.guild_id() else {
         ctx.say(guild_only_message()).await?;
@@ -36,7 +38,11 @@ pub async fn modlogchannel(
         return Ok(());
     }
 
-    if let Some(input) = input.as_deref().map(str::trim).filter(|entry| !entry.is_empty()) {
+    if let Some(input) = input
+        .as_deref()
+        .map(str::trim)
+        .filter(|entry| !entry.is_empty())
+    {
         if input.eq_ignore_ascii_case("clear") {
             clear_modlog_channel_id(&ctx.data().db, guild_id.get()).await?;
             ctx.say("Modlog channel cleared.").await?;
@@ -45,17 +51,20 @@ pub async fn modlogchannel(
 
         if let Some(channel_id) = parse_channel_id(input) {
             set_modlog_channel_id(&ctx.data().db, guild_id.get(), channel_id).await?;
-            ctx.say(format!("Modlog channel set to <#{}>.", channel_id)).await?;
+            ctx.say(format!("Modlog channel set to <#{}>.", channel_id))
+                .await?;
             return Ok(());
         }
 
-        ctx.say("Provide a valid channel mention/id, or `clear`.").await?;
+        ctx.say("Provide a valid channel mention/id, or `clear`.")
+            .await?;
         return Ok(());
     }
 
     let current = get_modlog_channel_id(&ctx.data().db, guild_id.get()).await?;
     if let Some(channel_id) = current {
-        ctx.say(format!("Current modlog channel: <#{}>", channel_id)).await?;
+        ctx.say(format!("Current modlog channel: <#{}>", channel_id))
+            .await?;
     } else {
         ctx.say("No modlog channel configured.").await?;
     }

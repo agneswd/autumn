@@ -92,16 +92,14 @@ where
     let mut current_page = start_page.clamp(1, total_pages) - 1;
 
     if total_pages <= 1 {
-        ctx.send(
-            poise::CreateReply::default().embed(build_page_embed(
-                title,
-                &pages[current_page],
-                current_page + 1,
-                total_pages,
-                author_icon_url,
-                false,
-            )),
-        )
+        ctx.send(poise::CreateReply::default().embed(build_page_embed(
+            title,
+            &pages[current_page],
+            current_page + 1,
+            total_pages,
+            author_icon_url,
+            false,
+        )))
         .await?;
 
         return Ok(());
@@ -264,7 +262,7 @@ where
 
             if let Some(submitted_page) = submitted_page
                 && let Ok(target_page) = submitted_page.trim().parse::<usize>()
-            && (1..=total_pages).contains(&target_page)
+                && (1..=total_pages).contains(&target_page)
             {
                 current_page = target_page - 1;
 
