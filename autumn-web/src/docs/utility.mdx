@@ -1,41 +1,65 @@
 # Utility
 
-General-purpose commands for checking bot status and network health.
+General-purpose commands for help, diagnostics, and command discovery.
+
+Autumn supports both prefix and slash commands. Examples below use prefix syntax.
 
 ## `!help`
-Displays the standard help menu with all available prefix and slash commands.
+Shows available commands by page or category.
 
 **Usage:**
 ```bash
-!help
+!help [page|category]
 ```
 
+**Examples:**
+```bash
+!help
+!help 2
+!help utility
+```
+
+---
+
+## `!usage`
+Shows syntax for a specific command.
+
+**Usage:**
+```bash
+!usage <command>
+```
+
+**Examples:**
+```bash
+!usage ban
+!usage timeout
+!usage modlogchannel
+```
+
+---
+
 ## `!ping`
-Check the bot's Discord WebSocket latency and API response time.
+Checks bot responsiveness/latency.
 
 **Usage:**
 ```bash
 !ping
 ```
 
-## `!usage`
-View resource usage statistics, memory consumption, and active shard metrics.
-
-**Usage:**
-```bash
-!usage
-```
+---
 
 ## `!pagetest`
-A developer utility to test the pagination embedding system.
+Developer utility for pagination behavior testing.
 
 **Usage:**
 ```bash
-!pagetest
+!pagetest [page]
 ```
 
+---
+
 ## `!universe`
-Easter egg. Are we alone?
+Lightweight easter-egg style command.
 
 **Usage:**
 ```bash

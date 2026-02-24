@@ -1,15 +1,30 @@
 # Setup & Configuration
 
-These commands are used by server administrators to configure Autumn's moderation behavior and access control.
+Configuration commands for moderation logging and staff visibility.
+
+Autumn supports both prefix and slash commands. Examples below use prefix syntax.
 
 ## `!modlogchannel`
-Set or update the channel where moderation actions and logs are recorded.
+Set, view, or clear the moderation log channel for the current server.
 
 **Usage:**
 ```bash
-!modlogchannel set <#channel>
-!modlogchannel clear
+!modlogchannel [#channel|channel_id|clear]
 ```
 
-**Description:**
-Requires `Manage Server` permission. Once configured, all warnings, bans, timeouts, and deleted messages will be logged directly to this channel.
+**Permission required:** `Manage Server`
+
+**Examples:**
+```bash
+!modlogchannel #mod-logs
+!modlogchannel 123456789012345678
+!modlogchannel clear
+!modlogchannel
+```
+
+**What it does:**
+- With a channel mention or channel ID, stores that channel as the server modlog target.
+- With `clear`, removes the stored modlog channel.
+- With no argument, shows the currently configured modlog channel.
+
+If no modlog channel is configured, moderation actions still work; they just won’t be mirrored to a dedicated modlog channel.

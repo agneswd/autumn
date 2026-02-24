@@ -1,27 +1,51 @@
 # Reversals
 
-Mistakes happen. Autumn makes it easy to reverse moderation actions cleanly.
+Reversal commands undo prior moderation actions when needed.
+
+Autumn supports both prefix and slash commands. Examples below use prefix syntax.
 
 ## `!unban`
-Revoke a ban for a user, allowing them to rejoin the server.
+Removes a ban for a user.
 
 **Usage:**
 ```bash
-!unban <@user>
+!unban <user> [reason]
 ```
+
+**Permission required:** `Ban Members`
+
+If the user is not currently banned in this server, the command exits without applying changes.
+
+---
 
 ## `!untimeout`
-Remove an active timeout restriction from a user early.
+Removes an active timeout from a user.
 
 **Usage:**
 ```bash
-!untimeout <@user> [reason]
+!untimeout <user> [reason]
 ```
+
+**Permission required:** `Moderate Members`
+
+If the target is not currently timed out, the command exits without applying changes.
+
+---
 
 ## `!unwarn`
-Remove a specific warning from a user's record using the Case ID.
+Removes one warning or all warnings for a target user.
 
 **Usage:**
 ```bash
-!unwarn <case_id> [reason]
+!unwarn <user> <warn_number|all>
 ```
+
+**Permission required:** `Manage Messages`
+
+**Examples:**
+```bash
+!unwarn @user 2
+!unwarn @user all
+```
+
+`all` triggers a confirmation step before clearing.

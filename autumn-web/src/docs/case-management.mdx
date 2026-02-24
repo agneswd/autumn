@@ -1,35 +1,76 @@
 # Case Management
 
-Autumn leverages PostgreSQL to store a persistent, immutable log of all moderation actions taken against users globally.
+Case and note tools used by moderators for auditability and follow-up actions.
+
+Autumn supports both prefix and slash commands. Examples below use prefix syntax.
 
 ## `!case`
-Lookup a specific moderation case by its exact ID.
+View a moderation case or update it with a reason/note action.
 
 **Usage:**
 ```bash
-!case <id>
+!case <case_id> [reason|note] [text]
 ```
+
+**Permission required:** `Manage Messages`
+
+**Examples:**
+```bash
+!case W12
+!case B3 reason Updated reason after review
+!case T4 note Escalated to admin team
+```
+
+`case_id` format is label + number (for example `W1`, `B2`, `K3`, `T8`).
+
+---
 
 ## `!modlogs`
-View the complete moderation history across the server.
+Shows recent moderation cases with optional filters.
 
 **Usage:**
 ```bash
-!modlogs
+!modlogs [target_user] [moderator] [action]
 ```
+
+**Permission required:** `Manage Messages`
+
+---
 
 ## `!warnings`
-List all warnings for a user.
+Displays warning history for a user in a selected time window.
 
 **Usage:**
 ```bash
-!warnings <@user>
+!warnings <user> [days|all]
 ```
 
+**Permission required:** `Manage Messages`
+
+**Examples:**
+```bash
+!warnings @user
+!warnings @user 7
+!warnings @user all
+```
+
+If omitted, the default window is the last 30 days.
+
+---
+
 ## `!notes`
-Add a hidden, staff-only note to a user's profile.
+Adds, lists, or clears moderator notes for a user.
 
 **Usage:**
 ```bash
-!notes add <@user> <text>
+!notes <user> [note|clear]
+```
+
+**Permission required:** `Manage Messages`
+
+**Examples:**
+```bash
+!notes @user
+!notes @user Keep an eye on repeated low-effort spam
+!notes @user clear
 ```

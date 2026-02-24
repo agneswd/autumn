@@ -1,65 +1,103 @@
 # Core Moderation
 
-Autumn provides blazing fast, concurrent moderation commands for active communities. 
+Primary moderation commands used for user actions and channel cleanup.
+
+Autumn supports both prefix and slash commands. Examples below use prefix syntax.
 
 ## `!ban`
-Permanently ban a user from the server with an optional reason.
+Permanently bans a user from the current server.
 
 **Usage:**
 ```bash
-!ban <@user> [reason]
+!ban <user> [reason]
 ```
+
+**Permission required:** `Ban Members`
+
+---
 
 ## `!kick`
-Remove a user from the server gracefully.
+Removes a user from the current server without banning them.
 
 **Usage:**
 ```bash
-!kick <@user> [reason]
+!kick <user> [reason]
 ```
+
+**Permission required:** `Kick Members`
+
+---
 
 ## `!timeout`
-Restrict a user from sending messages for a specified duration.
+Applies a communication timeout to a user.
 
 **Usage:**
 ```bash
-!timeout <@user> <duration> [reason]
+!timeout <user> [duration] [reason]
 ```
 
-*(Duration examples: `10m`, `1h`, `1d`)*
+**Permission required:** `Moderate Members`
+
+**Duration notes:**
+- Default timeout is `10m` if duration is omitted.
+- Supports compact durations like `30s`, `10m`, `2h`, `1d`.
+- Supports chained durations like `1h10m`.
+
+**Prefix parsing examples:**
+```bash
+!timeout @user 30m spam
+!timeout @user 1h10m repeated violations
+!timeout @user 1h 30m -- reason can start with numbers like 10
+```
+
+---
 
 ## `!warn`
-Issue a formal warning to a user, recorded directly in their permanent modlog.
+Records a warning for a user in the current server.
 
 **Usage:**
 ```bash
-!warn <@user> <reason>
+!warn <user> [reason]
 ```
+
+**Permission required:** `Manage Messages`
+
+---
 
 ## `!purge`
-Bulk delete a specific number of recent messages in the current channel.
+Deletes recent messages in the current channel.
 
 **Usage:**
 ```bash
-!purge <1-100>
+!purge <amount>
 ```
+
+**Permission required:** `Manage Messages`
+
+`amount` must be at least `1`. The command internally caps deletion for safety.
+
+---
 
 ## `!terminate`
-**Extreme.** Bans a user and wipes all their message history instantly.
+Dangerous action: bans a user and performs native Discord message cleanup window handling.
 
 **Usage:**
 ```bash
-!terminate <@user> [reason]
+!terminate <user> [period] [reason]
 ```
 
+**Permissions required:** `Ban Members` + `Manage Messages`
+
+This command uses a moderator confirmation flow before execution.
+
+---
 
 ## `!permissions`
-Check which permissions a user has in the current server.
+Shows **your own** effective server permissions in a paginated list.
 
 **Usage:**
 ```bash
-!permissions <@user>
+!permissions [page]
 ```
 
-**Description:**
-Requires `Manage Messages` permission. Displays the current user's active permissions matrix within the server context.
+**Permission required:** `Manage Messages`

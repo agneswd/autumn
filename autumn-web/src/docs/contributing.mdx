@@ -1,42 +1,74 @@
 # Contributing to Autumn
 
-Contributions of any kind - code, documentation, bug reports, or ideas - are all appreciated! 
+Thanks for your interest in improving Autumn.
+
+Contributions are welcome across code, docs, testing, bug reports, and UX feedback.
 
 ## How to Contribute
 
-### Reporting Issues
-Found a bug or have a feature request? Please open an issue on the relevant repository:
+### 1) Report a Bug or Request a Feature
+If you found an issue or have an improvement idea, open an issue first:
+
 - [Autumn Issues](https://github.com/agneswd/autumn/issues)
 
-### Pull Requests
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/my-feature`
-3. Make your changes
-4. Test thoroughly
-5. Commit with clear messages: `git commit -m "<component/area>: new feature description"`
-6. Push to your fork: `git push origin feature/my-feature`
-7. Open a Pull Request
+When possible, include:
+- expected behavior
+- actual behavior
+- reproduction steps
+- environment/context
 
-### Code Style
-- **Rust (Back-end)**: Follow standard Rust formatting (`cargo fmt`). Ensure you run `cargo clippy` and fix any lint errors. Include appropriate test coverage.
-- **React (Front-end)**: Use consistent formatting with ESLint/Prettier. Design components cleanly and functionally.
-- **Documentation**: Use clear, concise language.
+### 2) Submit a Pull Request
+1. Fork the repository.
+2. Create a focused branch:
+	 ```bash
+	 git checkout -b feature/my-change
+	 ```
+3. Implement your change with minimal unrelated edits.
+4. Run relevant checks before opening the PR.
+5. Commit with clear messages.
+6. Push and open a PR with a concise description.
+
+## Development Standards
+
+### Rust (bot/backend)
+- Format code with:
+	```bash
+	cargo fmt
+	```
+- Validate with:
+	```bash
+	cargo build
+	cargo clippy
+	```
+- Keep command handlers thin and place DB logic in the database layer.
+
+### Frontend (website)
+- Keep component/layout updates consistent with existing design.
+- Avoid large UX refactors unless they are part of the requested scope.
+
+### Documentation
+- Keep command usage synchronized with the actual command metadata.
+- If command behavior or arguments change, update the docs in `autumn-web/src/docs/`.
 
 ## Community Guidelines
-Be respectful on all forums such as GitHub discussions, Discord, etc.
-- Be respectful and inclusive
-- Help others when you can
-- Document your code
-- Keep discussions on-topic
+
+Help keep the project collaborative and respectful:
+- Be respectful and inclusive.
+- Keep discussion technical and constructive.
+- Assume good intent.
+- Prefer clear, actionable feedback.
 
 ## Support the Project
-Want to support Autumn's development and operational server costs? Consider tipping us!
-*(Payment links pending)*
+
+If you want to support Autumn’s development and operating costs, keep an eye out for upcoming support links.
 
 ## License
-All Autumn projects are licensed under the MIT License. By contributing, you agree to license your contributions under the same license.
+
+Autumn is licensed under the MIT License.
+By contributing, you agree your contributions are provided under the same license.
 
 ## Getting Help
-- **Discord:** Join the [Autumn Support Server](https://discord.gg/autumnbot) and ask questions in the relevant development channels.
-- **GitHub Discussions:** Ask questions and share ideas directly on our repositories.
-- **Documentation:** Check the `/docs` page first.
+
+- **Discord:** [Autumn Support Server](https://discord.gg/autumnbot)
+- **GitHub:** Issues and discussions in the repository
+- **Docs:** Start with `/docs` for command usage and expected behavior
