@@ -1,4 +1,5 @@
 pub mod cases;
+pub mod escalation;
 pub mod leveling;
 pub mod llm_chat;
 pub mod notes;

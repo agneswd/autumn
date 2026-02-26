@@ -8,10 +8,13 @@ mod core_group;
 mod reversals_group;
 
 pub use case_group::{case, modlogs, notes, userlogs, warnings};
-pub use config_group::{aitoggle, modlogchannel, permissions, userlogchannel, wordfilter};
+pub use config_group::{
+    aitoggle, escalation, modlogchannel, permissions, userlogchannel, wordfilter,
+};
 pub use core_group::{ban, kick, purge, terminate, timeout, warn};
 pub use embeds::send_moderation_target_dm_for_guild;
 pub use reversals_group::{unban, untimeout, unwarn};
 
 pub(crate) mod embeds;
+pub mod escalation_check;
 mod logging;

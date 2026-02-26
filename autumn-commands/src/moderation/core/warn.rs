@@ -5,6 +5,7 @@ use crate::moderation::embeds::{
     guild_only_message, moderation_action_embed, moderation_bot_target_message,
     send_moderation_target_dm_for_guild, target_profile_from_user, usage_message,
 };
+use crate::moderation::escalation_check::check_and_escalate;
 use crate::moderation::logging::create_case_and_publish;
 use autumn_core::{Context, Error};
 use autumn_database::impls::cases::NewCase;
@@ -94,6 +95,21 @@ pub async fn warn(
         embed = embed.footer(serenity::CreateEmbedFooter::new(format!("#{}", case_label)));
     }
     ctx.send(poise::CreateReply::default().embed(embed)).await?;
+
+    // Check for automatic escalation (warn threshold → auto-timeout).
+    let bot_user_id = ctx.cache().current_user().id.get();
+    if let Some(result) =
+        check_and_escalate(ctx.http(), &ctx.data().db, guild_id, &user, bot_user_id).await
+        && result.timed_out
+        && let Some(secs) = result.timeout_seconds
+    {
+        ctx.say(format!(
+            "⚠ Auto-escalation: <@{}> has been timed out for **{}** (warning threshold reached).",
+            user.id,
+            autumn_utils::formatting::format_compact_duration(secs as u64),
+        ))
+        .await?;
+    }
 
     Ok(())
 }

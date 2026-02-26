@@ -35,6 +35,7 @@ pub const COMMANDS: &[CommandMeta] = &[
     moderation::case::META,
     moderation::notes::META,
     moderation::wordfilter::META,
+    moderation::escalation::META,
 ];
 
 pub fn commands() -> Vec<poise::Command<Data, Error>> {
@@ -63,5 +64,6 @@ pub fn commands() -> Vec<poise::Command<Data, Error>> {
         moderation::case::case(),
         moderation::notes::notes(),
         moderation::wordfilter::wordfilter(),
+        moderation::escalation::escalation(),
     ]
 }

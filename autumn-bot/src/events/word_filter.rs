@@ -3,6 +3,7 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use poise::serenity_prelude as serenity;
 use tracing::{error, warn};
 
+use autumn_commands::moderation::escalation_check::check_and_escalate;
 use autumn_commands::moderation::send_moderation_target_dm_for_guild;
 use autumn_core::Data;
 use autumn_database::impls::cases::{NewCase, create_case};
@@ -127,6 +128,9 @@ pub async fn handle_message_word_filter(
                 None,
             )
             .await;
+
+            // Check for automatic escalation (warn threshold → auto-timeout).
+            check_and_escalate(&ctx.http, &data.db, guild_id, &message.author, bot_user_id).await;
         }
         "timeout_delete_and_log" => {
             if let Err(source) = message.delete(&ctx.http).await {

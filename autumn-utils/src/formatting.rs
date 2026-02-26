@@ -16,6 +16,7 @@ pub fn action_display_name(action: &str) -> String {
         "unwarn_all" => "Unwarn All".to_owned(),
         "purge" => "Purge".to_owned(),
         "terminate" => "Terminate".to_owned(),
+        "auto_timeout" => "Auto Timeout".to_owned(),
         other => {
             let normalized = other.trim();
             if normalized.is_empty() {
@@ -58,6 +59,7 @@ pub fn action_past_tense(action: &str) -> String {
         "unwarn_all" => "had all warnings cleared".to_owned(),
         "purge" => "purged".to_owned(),
         "terminate" => "terminated".to_owned(),
+        "auto_timeout" => "automatically timed out".to_owned(),
         other => format!("{}ed", other),
     }
 }

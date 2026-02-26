@@ -1,5 +1,6 @@
 pub mod ai_config;
 pub mod cases;
+pub mod escalation;
 pub mod leveling;
 pub mod llm_chat;
 pub mod modlog_config;
