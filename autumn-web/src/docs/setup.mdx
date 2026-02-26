@@ -56,6 +56,42 @@ Set, view, or clear the channel used for user message activity logs.
 
 ---
 
+## `!wordfilter`
+Manage the word filter for this server. Automatically detects and acts on messages containing filtered words.
+
+**Subcommands:**
+
+**`!wordfilter enable`**
+Enable the word filter.
+
+**`!wordfilter disable`**
+Disable the word filter.
+
+**`!wordfilter action <log|delete|warn|timeout>`**
+Set the action taken when a filtered word is detected:
+- **log** — Only log the violation to the modlog channel
+- **delete** — Delete the message and log the violation
+- **warn** — Warn the user, delete the message, and log the violation
+- **timeout** — Timeout the user (5 min), delete the message, and log the violation
+
+**`!wordfilter preset <load|clear>`**
+Load or clear a curated preset list of commonly offensive words.
+
+**`!wordfilter add <word>`**
+Add a custom word to the filter list. Duplicates are rejected.
+
+**`!wordfilter remove <word>`**
+Remove a word from the filter list.
+
+**`!wordfilter list`**
+Display all currently filtered words (paginated).
+
+**Permission required:** `Manage Server`
+
+All subcommands also work as slash commands (e.g. `/wordfilter enable`).
+
+---
+
 ## `!aitoggle`
 Enable or disable AI mention replies for the current server.
 
