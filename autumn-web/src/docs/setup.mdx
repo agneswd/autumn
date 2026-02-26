@@ -92,6 +92,47 @@ All subcommands also work as slash commands (e.g. `/wordfilter enable`).
 
 ---
 
+## `!escalation`
+Configure automatic warn → timeout escalation. When a user accumulates enough warnings within a time window, they are automatically timed out. Repeated timeouts escalate in duration.
+
+**Subcommands:**
+
+**`!escalation enable`**
+Enable automatic escalation.
+
+**`!escalation disable`**
+Disable automatic escalation.
+
+**`!escalation set warns <count>`**
+Set how many warnings trigger an auto-timeout (default: 3).
+
+**`!escalation set warnwindow <duration>`**
+Set the time window for counting warnings (default: 24h). Example: `24h`, `7d`.
+
+**`!escalation set timeoutwindow <duration>`**
+Set the time window for timeout escalation tiers (default: 7d). Example: `7d`, `30d`.
+
+**Timeout escalation tiers:**
+- 1st auto-timeout → 5 minutes
+- 2nd auto-timeout → 30 minutes
+- 3rd auto-timeout → 2 hours
+- 4th auto-timeout → 1 day
+- 5th+ auto-timeout → 1 week
+
+**How it works:**
+
+Once a user reaches the warning threshold (e.g. 3 warnings within 24h), they are automatically timed out. After that, every additional warning within the same window triggers another auto-timeout at an escalated tier — they don't need to reach the threshold again. Once the warn window expires without new warnings, the count resets and they would need to reach the full threshold again.
+
+Timeout tiers are based on how many timeouts the user already has within the timeout window (default 7 days). So a user who keeps getting warned and auto-timed-out will progress through increasingly longer timeouts.
+
+With no subcommand, `!escalation` shows the current configuration.
+
+**Permission required:** `Manage Server`
+
+All subcommands also work as slash commands (e.g. `/escalation enable`).
+
+---
+
 ## `!aitoggle`
 Enable or disable AI mention replies for the current server.
 
