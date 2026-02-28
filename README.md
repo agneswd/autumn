@@ -56,8 +56,6 @@ Optional LLM rate-limit overrides:
 - `LLM_RATELIMIT_WINDOW_SECONDS` (default: `10`)
 - `LLM_RATELIMIT_MAX_HITS` (default: `2`)
 
-Autumn logs cache/rate-limit counters every 60 seconds (`cache_hit`, `cache_miss`, `cache_set`, `cache_del`, `cache_error`, `cache_fallback_load`, `ratelimit_checks`, `ratelimit_blocks`) to help observe behavior in production.
-
 *(Optional)* The bot comes with a default system prompt for the LLM integration. If you want to use a custom prompt, simply create a `SYSTEM_PROMPT.md` file in the root directory and write your custom instructions there.
 
 Next, install `sqlx-cli` if you haven't already. You can do so with:
