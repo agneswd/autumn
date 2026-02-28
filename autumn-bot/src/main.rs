@@ -3,7 +3,7 @@ mod events;
 use std::env;
 
 use poise::serenity_prelude as serenity;
-use tracing::{debug, error, info};
+use tracing::{debug, error, info, warn};
 use tracing_subscriber::Layer;
 use tracing_subscriber::filter::filter_fn;
 use tracing_subscriber::layer::SubscriberExt;
@@ -13,7 +13,7 @@ use rustls::crypto::ring::default_provider;
 use sqlx::postgres::PgPoolOptions;
 
 use autumn_core::{Data, Error};
-use autumn_database::{Database, MIGRATOR};
+use autumn_database::{CacheService, Database, MIGRATOR};
 use autumn_llm::LlmService;
 
 #[tokio::main]
@@ -49,7 +49,34 @@ async fn main() -> anyhow::Result<()> {
         .connect(&database_url)
         .await?;
     info!("PostgreSQL connection established.");
-    let db = Database::new(db_pool);
+
+    let redis_enabled = env_bool("REDIS_ENABLED", false);
+    let redis_key_prefix =
+        env::var("REDIS_KEY_PREFIX").unwrap_or_else(|_| "autumn:prod".to_string());
+
+    let cache = if redis_enabled {
+        match env::var("REDIS_URL") {
+            Ok(redis_url) => match CacheService::redis(&redis_url, redis_key_prefix.clone()) {
+                Ok(cache) => {
+                    info!(key_prefix = %redis_key_prefix, "Redis cache enabled.");
+                    cache
+                }
+                Err(err) => {
+                    warn!(?err, key_prefix = %redis_key_prefix, "Failed to initialize Redis cache; continuing with DB-only mode.");
+                    CacheService::disabled(redis_key_prefix.clone())
+                }
+            },
+            Err(_) => {
+                warn!(key_prefix = %redis_key_prefix, "REDIS_ENABLED=true but REDIS_URL is missing; continuing with DB-only mode.");
+                CacheService::disabled(redis_key_prefix.clone())
+            }
+        }
+    } else {
+        info!("Redis cache disabled (set REDIS_ENABLED=true to enable).");
+        CacheService::disabled(redis_key_prefix.clone())
+    };
+
+    let db = Database::with_cache(db_pool, cache);
     let llm = LlmService::from_env_optional()?;
     if llm.is_some() {
         info!("LLM integration enabled.");

@@ -43,6 +43,13 @@ Create a new file named `.env` in the root directory and provide all of its vari
 - `OLLAMA_PORT` (e.g., `11434`)
 - `OLLAMA_MODEL` (e.g., `llama3`)
 
+Optional Redis cache variables:
+- `REDIS_ENABLED` (`true`/`false`, default: `false`)
+- `REDIS_URL` (e.g., `redis://127.0.0.1:6379`)
+- `REDIS_KEY_PREFIX` (default: `autumn:prod`)
+
+If Redis is enabled but unavailable or misconfigured, Autumn automatically falls back to database-only mode.
+
 *(Optional)* The bot comes with a default system prompt for the LLM integration. If you want to use a custom prompt, simply create a `SYSTEM_PROMPT.md` file in the root directory and write your custom instructions there.
 
 Next, install `sqlx-cli` if you haven't already. You can do so with:
@@ -68,4 +75,4 @@ cargo run --release
 
 ---
 
-*Note: This project originally started using the `twilight` ecosystem for Discord API interactions before being refactored to use `serenity` and `poise`. You can find the original archived repository here: [rusty-twilight](https://github.com/agne9/rusty-twilight).*
+*Note: This project originally started using the `twilight` ecosystem for Discord API interactions before being refactored to use `serenity` and `poise`. You can find the original archived repository here: [rusty-twilight](https://github.com/agneswd/rusty-twilight).*

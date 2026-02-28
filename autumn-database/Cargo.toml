@@ -5,5 +5,10 @@ edition = "2024"
 
 [dependencies]
 anyhow = { workspace = true }
+deadpool-redis = { workspace = true }
+redis = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
 sqlx = { workspace = true }
 tokio = { workspace = true }
+tracing = { workspace = true }
