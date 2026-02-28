@@ -138,6 +138,16 @@ pub async fn add_filter_word(
     word: &str,
     is_preset: bool,
 ) -> anyhow::Result<bool> {
+    add_filter_word_internal(db, guild_id, word, is_preset, true).await
+}
+
+async fn add_filter_word_internal(
+    db: &Database,
+    guild_id: u64,
+    word: &str,
+    is_preset: bool,
+    invalidate_cache: bool,
+) -> anyhow::Result<bool> {
     let guild_id_i64 = i64::try_from(guild_id).context("guild_id out of i64 range")?;
     let lower = word.to_lowercase();
 
@@ -152,7 +162,9 @@ pub async fn add_filter_word(
     .execute(db.pool())
     .await?;
 
-    invalidate_word_filter(db.cache(), guild_id).await?;
+    if invalidate_cache {
+        invalidate_word_filter(db.cache(), guild_id).await?;
+    }
 
     Ok(result.rows_affected() > 0)
 }
@@ -229,12 +241,14 @@ pub async fn get_all_filter_words_for_guild(
 pub async fn load_preset_words(db: &Database, guild_id: u64) -> anyhow::Result<u64> {
     let mut inserted: u64 = 0;
     for word in PRESET_WORDS {
-        if add_filter_word(db, guild_id, word, true).await? {
+        if add_filter_word_internal(db, guild_id, word, true, false).await? {
             inserted += 1;
         }
     }
 
-    invalidate_word_filter(db.cache(), guild_id).await?;
+    if inserted > 0 {
+        invalidate_word_filter(db.cache(), guild_id).await?;
+    }
 
     Ok(inserted)
 }
