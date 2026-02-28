@@ -1,6 +1,7 @@
+use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 
-#[derive(Debug, Clone, FromRow)]
+#[derive(Debug, Clone, FromRow, Serialize, Deserialize)]
 pub struct EscalationConfig {
     pub guild_id: i64,
     pub enabled: bool,

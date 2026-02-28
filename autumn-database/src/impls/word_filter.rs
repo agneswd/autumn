@@ -1,5 +1,9 @@
 use anyhow::Context as _;
 
+use crate::cache::{
+    CONFIG_CACHE_TTL, WORD_LIST_CACHE_TTL, invalidate_word_filter, word_filter_config_key,
+    word_filter_words_key,
+};
 use crate::database::Database;
 use crate::model::word_filter::{WordFilterConfig, WordFilterWord};
 
@@ -57,20 +61,25 @@ pub async fn get_word_filter_config(
     db: &Database,
     guild_id: u64,
 ) -> anyhow::Result<Option<WordFilterConfig>> {
-    let guild_id_i64 = i64::try_from(guild_id).context("guild_id out of i64 range")?;
+    let cache_key = word_filter_config_key(db.cache(), guild_id);
+    db.cache()
+        .get_or_load_json(&cache_key, CONFIG_CACHE_TTL, || async {
+            let guild_id_i64 = i64::try_from(guild_id).context("guild_id out of i64 range")?;
 
-    let row = sqlx::query_as::<_, (bool, String)>(
-        "SELECT enabled, action FROM word_filter_config WHERE guild_id = $1",
-    )
-    .bind(guild_id_i64)
-    .fetch_optional(db.pool())
-    .await?;
+            let row = sqlx::query_as::<_, (bool, String)>(
+                "SELECT enabled, action FROM word_filter_config WHERE guild_id = $1",
+            )
+            .bind(guild_id_i64)
+            .fetch_optional(db.pool())
+            .await?;
 
-    Ok(row.map(|(enabled, action)| WordFilterConfig {
-        guild_id,
-        enabled,
-        action,
-    }))
+            Ok(row.map(|(enabled, action)| WordFilterConfig {
+                guild_id,
+                enabled,
+                action,
+            }))
+        })
+        .await
 }
 
 pub async fn set_word_filter_enabled(
@@ -89,6 +98,8 @@ pub async fn set_word_filter_enabled(
     .bind(enabled)
     .execute(db.pool())
     .await?;
+
+    invalidate_word_filter(db.cache(), guild_id).await?;
 
     Ok(())
 }
@@ -109,6 +120,8 @@ pub async fn set_word_filter_action(
     .bind(action)
     .execute(db.pool())
     .await?;
+
+    invalidate_word_filter(db.cache(), guild_id).await?;
 
     Ok(())
 }
@@ -139,6 +152,8 @@ pub async fn add_filter_word(
     .execute(db.pool())
     .await?;
 
+    invalidate_word_filter(db.cache(), guild_id).await?;
+
     Ok(result.rows_affected() > 0)
 }
 
@@ -152,6 +167,8 @@ pub async fn remove_filter_word(db: &Database, guild_id: u64, word: &str) -> any
         .bind(&lower)
         .execute(db.pool())
         .await?;
+
+    invalidate_word_filter(db.cache(), guild_id).await?;
 
     Ok(result.rows_affected() > 0)
 }
@@ -191,15 +208,20 @@ pub async fn get_all_filter_words_for_guild(
     db: &Database,
     guild_id: u64,
 ) -> anyhow::Result<Vec<String>> {
-    let guild_id_i64 = i64::try_from(guild_id).context("guild_id out of i64 range")?;
+    let cache_key = word_filter_words_key(db.cache(), guild_id);
+    db.cache()
+        .get_or_load_json(&cache_key, WORD_LIST_CACHE_TTL, || async {
+            let guild_id_i64 = i64::try_from(guild_id).context("guild_id out of i64 range")?;
 
-    let words: Vec<String> =
-        sqlx::query_scalar("SELECT word FROM word_filter_words WHERE guild_id = $1")
-            .bind(guild_id_i64)
-            .fetch_all(db.pool())
-            .await?;
+            let words: Vec<String> =
+                sqlx::query_scalar("SELECT word FROM word_filter_words WHERE guild_id = $1")
+                    .bind(guild_id_i64)
+                    .fetch_all(db.pool())
+                    .await?;
 
-    Ok(words)
+            Ok(words)
+        })
+        .await
 }
 
 /// Load all preset words into the guild's filter list. Duplicates are skipped.
@@ -211,6 +233,9 @@ pub async fn load_preset_words(db: &Database, guild_id: u64) -> anyhow::Result<u
             inserted += 1;
         }
     }
+
+    invalidate_word_filter(db.cache(), guild_id).await?;
+
     Ok(inserted)
 }
 
@@ -223,6 +248,8 @@ pub async fn clear_preset_words(db: &Database, guild_id: u64) -> anyhow::Result<
             .bind(guild_id_i64)
             .execute(db.pool())
             .await?;
+
+    invalidate_word_filter(db.cache(), guild_id).await?;
 
     Ok(result.rows_affected())
 }

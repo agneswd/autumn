@@ -23,6 +23,9 @@ pub struct CacheService {
     backend: CacheBackend,
 }
 
+pub const CONFIG_CACHE_TTL: Duration = Duration::from_secs(15 * 60);
+pub const WORD_LIST_CACHE_TTL: Duration = Duration::from_secs(5 * 60);
+
 impl CacheService {
     pub fn disabled(prefix: impl Into<String>) -> Self {
         Self {
@@ -116,4 +119,44 @@ impl CacheService {
 
         Ok(loaded)
     }
+}
+
+pub fn ai_config_key(cache: &CacheService, guild_id: u64) -> String {
+    cache.key(format!("guild:{guild_id}:config:ai"))
+}
+
+pub fn modlog_config_key(cache: &CacheService, guild_id: u64) -> String {
+    cache.key(format!("guild:{guild_id}:config:modlog"))
+}
+
+pub fn escalation_config_key(cache: &CacheService, guild_id: u64) -> String {
+    cache.key(format!("guild:{guild_id}:config:escalation"))
+}
+
+pub fn word_filter_config_key(cache: &CacheService, guild_id: u64) -> String {
+    cache.key(format!("guild:{guild_id}:config:word_filter"))
+}
+
+pub fn word_filter_words_key(cache: &CacheService, guild_id: u64) -> String {
+    cache.key(format!("guild:{guild_id}:config:word_filter_words"))
+}
+
+pub async fn invalidate_ai_config(cache: &CacheService, guild_id: u64) -> anyhow::Result<()> {
+    cache.del(&ai_config_key(cache, guild_id)).await
+}
+
+pub async fn invalidate_modlog_config(cache: &CacheService, guild_id: u64) -> anyhow::Result<()> {
+    cache.del(&modlog_config_key(cache, guild_id)).await
+}
+
+pub async fn invalidate_escalation_config(
+    cache: &CacheService,
+    guild_id: u64,
+) -> anyhow::Result<()> {
+    cache.del(&escalation_config_key(cache, guild_id)).await
+}
+
+pub async fn invalidate_word_filter(cache: &CacheService, guild_id: u64) -> anyhow::Result<()> {
+    cache.del(&word_filter_config_key(cache, guild_id)).await?;
+    cache.del(&word_filter_words_key(cache, guild_id)).await
 }

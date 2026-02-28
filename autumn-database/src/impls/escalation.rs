@@ -2,6 +2,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use anyhow::Context as _;
 
+use crate::cache::{CONFIG_CACHE_TTL, escalation_config_key, invalidate_escalation_config};
 use crate::database::Database;
 use crate::model::escalation::EscalationConfig;
 
@@ -35,17 +36,22 @@ pub async fn get_escalation_config(
     db: &Database,
     guild_id: u64,
 ) -> anyhow::Result<Option<EscalationConfig>> {
-    let guild_id_i64 = i64::try_from(guild_id).context("guild_id out of i64 range")?;
+    let cache_key = escalation_config_key(db.cache(), guild_id);
+    db.cache()
+        .get_or_load_json(&cache_key, CONFIG_CACHE_TTL, || async {
+            let guild_id_i64 = i64::try_from(guild_id).context("guild_id out of i64 range")?;
 
-    let row = sqlx::query_as::<_, EscalationConfig>(
-        "SELECT guild_id, enabled, warn_threshold, warn_window_seconds, timeout_window_seconds \
-         FROM escalation_config WHERE guild_id = $1",
-    )
-    .bind(guild_id_i64)
-    .fetch_optional(db.pool())
-    .await?;
+            let row = sqlx::query_as::<_, EscalationConfig>(
+                "SELECT guild_id, enabled, warn_threshold, warn_window_seconds, timeout_window_seconds \
+                 FROM escalation_config WHERE guild_id = $1",
+            )
+            .bind(guild_id_i64)
+            .fetch_optional(db.pool())
+            .await?;
 
-    Ok(row)
+            Ok(row)
+        })
+        .await
 }
 
 /// Get the escalation config only if it is enabled.
@@ -53,17 +59,8 @@ pub async fn get_escalation_if_enabled(
     db: &Database,
     guild_id: u64,
 ) -> anyhow::Result<Option<EscalationConfig>> {
-    let guild_id_i64 = i64::try_from(guild_id).context("guild_id out of i64 range")?;
-
-    let row = sqlx::query_as::<_, EscalationConfig>(
-        "SELECT guild_id, enabled, warn_threshold, warn_window_seconds, timeout_window_seconds \
-         FROM escalation_config WHERE guild_id = $1 AND enabled = TRUE",
-    )
-    .bind(guild_id_i64)
-    .fetch_optional(db.pool())
-    .await?;
-
-    Ok(row)
+    let row = get_escalation_config(db, guild_id).await?;
+    Ok(row.filter(|cfg| cfg.enabled))
 }
 
 pub async fn set_escalation_enabled(
@@ -81,6 +78,8 @@ pub async fn set_escalation_enabled(
     .bind(enabled)
     .execute(db.pool())
     .await?;
+
+    invalidate_escalation_config(db.cache(), guild_id).await?;
 
     Ok(())
 }
@@ -101,6 +100,8 @@ pub async fn set_warn_threshold(
     .execute(db.pool())
     .await?;
 
+    invalidate_escalation_config(db.cache(), guild_id).await?;
+
     Ok(())
 }
 
@@ -120,6 +121,8 @@ pub async fn set_warn_window(
     .execute(db.pool())
     .await?;
 
+    invalidate_escalation_config(db.cache(), guild_id).await?;
+
     Ok(())
 }
 
@@ -138,6 +141,8 @@ pub async fn set_timeout_window(
     .bind(window_seconds)
     .execute(db.pool())
     .await?;
+
+    invalidate_escalation_config(db.cache(), guild_id).await?;
 
     Ok(())
 }
