@@ -24,6 +24,8 @@ pub struct CacheService {
     key_prefix: String,
     backend: CacheBackend,
     stats: Arc<CacheStatsInner>,
+    llm_rate_limit_window: Duration,
+    llm_rate_limit_max_hits: u64,
 }
 
 #[derive(Debug, Default)]
@@ -67,8 +69,8 @@ impl CacheStatsInner {
 
 pub const CONFIG_CACHE_TTL: Duration = Duration::from_secs(15 * 60);
 pub const WORD_LIST_CACHE_TTL: Duration = Duration::from_secs(5 * 60);
-pub const LLM_MENTION_RATE_LIMIT_WINDOW: Duration = Duration::from_secs(10);
-pub const LLM_MENTION_RATE_LIMIT_MAX_HITS: u64 = 2;
+pub const DEFAULT_LLM_MENTION_RATE_LIMIT_WINDOW: Duration = Duration::from_secs(10);
+pub const DEFAULT_LLM_MENTION_RATE_LIMIT_MAX_HITS: u64 = 2;
 
 impl CacheService {
     pub fn disabled(prefix: impl Into<String>) -> Self {
@@ -76,6 +78,8 @@ impl CacheService {
             key_prefix: prefix.into(),
             backend: CacheBackend::Disabled(NoopCacheStore),
             stats: Arc::new(CacheStatsInner::default()),
+            llm_rate_limit_window: DEFAULT_LLM_MENTION_RATE_LIMIT_WINDOW,
+            llm_rate_limit_max_hits: DEFAULT_LLM_MENTION_RATE_LIMIT_MAX_HITS,
         }
     }
 
@@ -84,7 +88,23 @@ impl CacheService {
             key_prefix: prefix.into(),
             backend: CacheBackend::Redis(RedisCacheStore::from_url(redis_url)?),
             stats: Arc::new(CacheStatsInner::default()),
+            llm_rate_limit_window: DEFAULT_LLM_MENTION_RATE_LIMIT_WINDOW,
+            llm_rate_limit_max_hits: DEFAULT_LLM_MENTION_RATE_LIMIT_MAX_HITS,
         })
+    }
+
+    pub fn configure_llm_rate_limit(&mut self, window: Duration, max_hits: u64) {
+        let (window, max_hits) = normalize_llm_rate_limit(window, max_hits);
+        self.llm_rate_limit_window = window;
+        self.llm_rate_limit_max_hits = max_hits;
+    }
+
+    pub fn llm_rate_limit_window(&self) -> Duration {
+        self.llm_rate_limit_window
+    }
+
+    pub fn llm_rate_limit_max_hits(&self) -> u64 {
+        self.llm_rate_limit_max_hits
     }
 
     pub fn key(&self, suffix: impl AsRef<str>) -> String {
@@ -238,6 +258,12 @@ impl CacheService {
     }
 }
 
+fn normalize_llm_rate_limit(window: Duration, max_hits: u64) -> (Duration, u64) {
+    let window_seconds = window.as_secs().clamp(1, 3600);
+    let normalized_hits = max_hits.max(1);
+    (Duration::from_secs(window_seconds), normalized_hits)
+}
+
 pub fn ai_config_key(cache: &CacheService, guild_id: u64) -> String {
     cache.key(format!("guild:{guild_id}:config:ai"))
 }
@@ -287,4 +313,30 @@ pub async fn invalidate_escalation_config(
 pub async fn invalidate_word_filter(cache: &CacheService, guild_id: u64) -> anyhow::Result<()> {
     cache.del(&word_filter_config_key(cache, guild_id)).await?;
     cache.del(&word_filter_words_key(cache, guild_id)).await
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn llm_key_generation_is_stable() {
+        let cache = CacheService::disabled("autumn:test");
+        let key = llm_mention_rate_limit_key(&cache, 1, 2, 3);
+        assert_eq!(
+            key,
+            "autumn:test:guild:1:channel:2:user:3:ratelimit:llm_mention"
+        );
+    }
+
+    #[test]
+    fn normalize_llm_rate_limit_applies_bounds() {
+        let (window, max_hits) = normalize_llm_rate_limit(Duration::from_secs(0), 0);
+        assert_eq!(window, Duration::from_secs(1));
+        assert_eq!(max_hits, 1);
+
+        let (window, max_hits) = normalize_llm_rate_limit(Duration::from_secs(7200), 5);
+        assert_eq!(window, Duration::from_secs(3600));
+        assert_eq!(max_hits, 5);
+    }
 }

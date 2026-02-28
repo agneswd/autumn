@@ -1,6 +1,4 @@
-use crate::cache::{
-    LLM_MENTION_RATE_LIMIT_MAX_HITS, LLM_MENTION_RATE_LIMIT_WINDOW, llm_mention_rate_limit_key,
-};
+use crate::cache::llm_mention_rate_limit_key;
 use crate::database::Database;
 
 pub async fn llm_mention_within_limit(
@@ -12,12 +10,13 @@ pub async fn llm_mention_within_limit(
     let cache = db.cache();
     let key = llm_mention_rate_limit_key(cache, guild_id, channel_id, user_id);
     let count = cache
-        .increment_with_window(&key, LLM_MENTION_RATE_LIMIT_WINDOW)
+        .increment_with_window(&key, cache.llm_rate_limit_window())
         .await?;
+    let max_hits = cache.llm_rate_limit_max_hits();
 
-    if count > LLM_MENTION_RATE_LIMIT_MAX_HITS {
+    if count > max_hits {
         cache.record_rate_limit_block();
     }
 
-    Ok(count <= LLM_MENTION_RATE_LIMIT_MAX_HITS)
+    Ok(count <= max_hits)
 }

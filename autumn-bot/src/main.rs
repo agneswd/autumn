@@ -14,7 +14,10 @@ use rustls::crypto::ring::default_provider;
 use sqlx::postgres::PgPoolOptions;
 
 use autumn_core::{Data, Error};
-use autumn_database::{CacheService, Database, MIGRATOR};
+use autumn_database::{
+    CacheService, Database, MIGRATOR, cache::DEFAULT_LLM_MENTION_RATE_LIMIT_MAX_HITS,
+    cache::DEFAULT_LLM_MENTION_RATE_LIMIT_WINDOW,
+};
 use autumn_llm::LlmService;
 
 #[tokio::main]
@@ -55,7 +58,7 @@ async fn main() -> anyhow::Result<()> {
     let redis_key_prefix =
         env::var("REDIS_KEY_PREFIX").unwrap_or_else(|_| "autumn:prod".to_string());
 
-    let cache = if redis_enabled {
+    let mut cache = if redis_enabled {
         match env::var("REDIS_URL") {
             Ok(redis_url) => match CacheService::redis(&redis_url, redis_key_prefix.clone()) {
                 Ok(cache) => {
@@ -76,6 +79,24 @@ async fn main() -> anyhow::Result<()> {
         info!("Redis cache disabled (set REDIS_ENABLED=true to enable).");
         CacheService::disabled(redis_key_prefix.clone())
     };
+
+    let llm_ratelimit_window_seconds = env_u64(
+        "LLM_RATELIMIT_WINDOW_SECONDS",
+        DEFAULT_LLM_MENTION_RATE_LIMIT_WINDOW.as_secs(),
+    );
+    let llm_ratelimit_max_hits = env_u64(
+        "LLM_RATELIMIT_MAX_HITS",
+        DEFAULT_LLM_MENTION_RATE_LIMIT_MAX_HITS,
+    );
+    cache.configure_llm_rate_limit(
+        Duration::from_secs(llm_ratelimit_window_seconds),
+        llm_ratelimit_max_hits,
+    );
+    info!(
+        llm_ratelimit_window_seconds = cache.llm_rate_limit_window().as_secs(),
+        llm_ratelimit_max_hits = cache.llm_rate_limit_max_hits(),
+        "LLM rate limit configured."
+    );
 
     if cache.is_redis_enabled() {
         if let Err(err) = cache.ping().await {
@@ -183,6 +204,13 @@ fn env_bool(key: &str, default: bool) -> bool {
             value.trim().to_ascii_lowercase().as_str(),
             "1" | "true" | "yes" | "on"
         ),
+        Err(_) => default,
+    }
+}
+
+fn env_u64(key: &str, default: u64) -> u64 {
+    match env::var(key) {
+        Ok(value) => value.trim().parse::<u64>().unwrap_or(default),
         Err(_) => default,
     }
 }
