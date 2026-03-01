@@ -38,7 +38,6 @@ A `Dockerfile` and `docker-compose.yml` are provided for containerized setup (re
 
 Copy `.env.example` to `.env` and fill in the required variables:
 - `DISCORD_TOKEN`
-- `DISCORD_GUILD_ID`
 - `POSTGRES_PASSWORD`, `POSTGRES_MIGRATOR_PASSWORD`, `POSTGRES_APP_PASSWORD`
 - `DATABASE_URL` — only needed for manual (non-container) setup (e.g. `postgres://username:password@localhost/autumn`)
 

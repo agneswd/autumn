@@ -46,7 +46,6 @@ async fn main() -> anyhow::Result<()> {
     // Store Discord Bot Token
     let token = env::var("DISCORD_TOKEN")?;
     let database_url = env::var("DATABASE_URL")?;
-    let guild_id = env::var("DISCORD_GUILD_ID")?.parse::<u64>()?;
 
     let db_pool = PgPoolOptions::new()
         .max_connections(5)
@@ -150,12 +149,7 @@ async fn main() -> anyhow::Result<()> {
             Box::pin(async move {
                 info!("Autumn has awoken!");
 
-                poise::builtins::register_in_guild(
-                    ctx,
-                    &framework.options().commands,
-                    serenity::GuildId::new(guild_id),
-                )
-                .await?;
+                poise::builtins::register_globally(ctx, &framework.options().commands).await?;
 
                 Ok(Data {
                     db,
