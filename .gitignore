@@ -1,0 +1,21 @@
+/target
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Editor/OS junk
+.vscode/
+.idea/
+.DS_Store
+
+# Logs
+*.log
+
+# AI
+AGENTS.md
+SYSTEM_PROMPT.md
+
+# Local
+/scripts/
