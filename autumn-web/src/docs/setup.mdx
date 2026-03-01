@@ -4,6 +4,46 @@ Configuration commands for moderation logging and staff visibility.
 
 Autumn supports both prefix and slash commands. Examples below use prefix syntax.
 
+## `!setup`
+One-command setup: apply a moderation preset that configures your modlog channel, userlog channel, escalation, and word filter in a single step.
+
+**Usage:**
+```bash
+!setup <basic|standard|strict> [#modlog-channel] [#userlog-channel]
+```
+
+**Permission required:** `Manage Server`
+
+**Examples:**
+```bash
+# Apply standard preset; Autumn finds or creates mod-logs and user-logs
+!setup standard
+
+# Apply strict preset with explicit channels
+!setup strict #mod-logs #user-logs
+
+# Show preset descriptions
+!setup
+```
+
+**Presets:**
+
+| Preset | Escalation | Word Filter | Preset Words |
+|---|---|---|---|
+| `basic` | Disabled | Disabled | — |
+| `standard` | Enabled — 3 warns / 24h → auto-timeout, 7d tier window | Enabled — Warn action | Not loaded |
+| `strict` | Enabled — 2 warns / 7d → auto-timeout, 30d tier window | Enabled — Timeout action | Loaded |
+
+**What it does:**
+- Sets the modlog and userlog channels (mentions existing `mod-logs` / `user-logs` channels, or creates them if missing — requires bot `Manage Channels` permission when auto-creating).
+- Enables or disables escalation and applies preset warn/timeout thresholds and windows.
+- Enables or disables the word filter and sets the action tier. The `strict` preset also loads the built-in offensive word list.
+- AI mention replies (`!aitoggle`) are **not changed** by setup.
+
+You can tune any individual setting afterward with `!modlogchannel`, `!userlogchannel`, `!escalation`, and `!wordfilter`.
+
+---
+
 ## `!modlogchannel`
 Set, view, or clear the moderation log channel for the current server.
 

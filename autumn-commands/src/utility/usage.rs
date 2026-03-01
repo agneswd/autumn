@@ -48,7 +48,7 @@ fn required_permissions_for_command(command_name: &str) -> Option<serenity::Perm
         "timeout" | "untimeout" => Some(serenity::Permissions::MODERATE_MEMBERS),
         "warn" | "warnings" | "unwarn" | "purge" | "permissions" | "modlogs" | "userlogs"
         | "case" | "notes" => Some(serenity::Permissions::MANAGE_MESSAGES),
-        "modlogchannel" | "userlogchannel" | "aitoggle" => {
+        "modlogchannel" | "userlogchannel" | "aitoggle" | "setup" => {
             Some(serenity::Permissions::MANAGE_GUILD)
         }
         "terminate" => {
